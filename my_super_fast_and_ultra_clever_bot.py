@@ -109,10 +109,10 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     
     if (playerLocation == last_positions[-1]):
         # On n'a pas pu bouger
-        direction = last_dir -1;
+        direction = reltoabs_direction (LEFT, last_dir);
 
     else :
-        direction = reltoabs_direction (RIGHT, last_dir)
+    	direction = reltoabs_direction (RIGHT, last_dir)
         
     last_positions.append(playerLocation)
     last_directions.append(direction)
