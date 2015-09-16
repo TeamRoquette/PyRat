@@ -6,7 +6,7 @@ import ast
 import sys
 import os
 
-KAKA = ['U', 'R', 'D', 'L']
+CONV_KEY = ['U', 'R', 'D', 'L']
 UP = 0
 DOWN = 2
 LEFT = 3
@@ -82,14 +82,14 @@ def processNextInformation () :
 last_directions = []
 last_positions = []
 
-
+# Convertit une direction relative en direction absolue par rapport à une direction de référence
 def reltoabs_direction (rel_direction, abs_direction):
     return (rel_direction + abs_direction) % 4
 
 
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
 
-    last_directions.append(UP)
+    last_directions.append(DOWN)
     last_positions.append(playerLocation)
     
     
@@ -111,12 +111,14 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
         # On n'a pas pu bouger
         direction = reltoabs_direction (LEFT, last_dir);
 
+    # C'est la première fois qu'on arriv sur cette case
     else :
     	direction = reltoabs_direction (RIGHT, last_dir)
         
+    # On ajoute en mémoire notre décision
     last_positions.append(playerLocation)
     last_directions.append(direction)
-    return KAKA[direction]
+    return CONV_KEY[direction]
 
 
 
