@@ -7,6 +7,7 @@ import sys
 import os
 
 CONV_KEY = ['U', 'R', 'D', 'L']
+ERROR = -1
 UP = 0
 RIGHT = 1
 DOWN = 2
@@ -77,21 +78,23 @@ last_directions = []
 last_positions = []
 
 
-
+# Fonction intermédiaire pour parcours_en_largeur
+# trie le dictionnaire des meilleurs sommets pour en faire une liste compréhensible plus facilement
 def ordonne (best_vert, start, stop, path):
     if start == stop:
-        return [start] + path
+        return path + [start]
 
-    return ordonne (best_vert, start, best_vert[stop][0], [stop] + path) 
+    return ordonne (best_vert, start, best_vert[stop][0], path + [stop]) 
 
 
-def dijkstra (mazeMap, playerLocation, coinLocation) :
+# Réalise le parcours en largeur de la map et retourne la liste ordonée des sommets à suivre
+def parcours_en_largeur (mazeMap, playerLocation, coinLocation) :
     best_vertice = {(playerLocation):((),0)}
     seen_vertice = []
     to_see_vertice = [playerLocation]
     #while len(seen_vertice) != len(mazeMap) :
     while to_see_vertice :
-        vertex = to_see_vertice.pop()
+        vertex = to_see_vertice.pop(0)
         if vertex not in seen_vertice :
             voisins = mazeMap[vertex]
             dist = best_vertice.get(vertex, ([], float('inf')))[1]
@@ -99,6 +102,8 @@ def dijkstra (mazeMap, playerLocation, coinLocation) :
             for (v,d) in voisins :
                 if best_vertice.get(v, ([], float('inf')))[1] > d + dist :
                     best_vertice[v] = (vertex, d + dist)
+
+                    debugmap(best_vertice,25)
                     
                 seen_vertice.append(vertex)
                 to_see_vertice.append(v)
@@ -106,22 +111,52 @@ def dijkstra (mazeMap, playerLocation, coinLocation) :
     return ordonne(best_vertice, playerLocation, coinLocation, [])
 
 
-# Convertit une direction relative en direction absolue par rapport à une direction de référence
-def reltoabs_direction (rel_direction, abs_direction):
-    return (rel_direction + abs_direction) % 4
+def debugmap(best_vertice,height_map):
+    l = ''
+    for i in range (height_map):
+        for j in range (height_map):
+            c = best_vertice.get((i,j), ([], -1) )[1]
+            if c == -1:
+                l += '---'
+            elif c < 10:
+                l += ' '+str(c)+' '
+            elif c < 100:
+                l += ' '+str(c)
+            else:
+                l += str(c)
+                
+            l+= ' '
 
+        l+='\n'
+            
+    debug(l+'\n\n\n')
 
+# Détermine la direction pour rallier next_pos depuis actual_pos, 
+# Renvoie ERROR si cela n'est pas possible
 def nextpostodir (next_pos, actual_pos, mazeMap):
     # Check if next position is reachable
     next_poses = mazeMap[actual_pos]
-    if next_pos not in next_poses:
-        return -1
+    reachable = False
+    for (pos, d) in next_poses:
+        if pos == next_pos:
+            reachable = True
+    
+    if not reachable:
+        return ERROR
 
-    (x_act, y_act) = actual_pos
-    (x_next, y_next) = next_pos
-
-    #if x_act == x_next:
-        #if :
+    (y_act, x_act) = actual_pos
+    (y_next, x_next) = next_pos
+    
+    if x_act == x_next:
+        if y_next > y_act:
+            return DOWN
+        else:
+            return UP
+    else:
+        if x_next > x_act:
+            return RIGHT
+        else:
+            return LEFT
     
 
 
@@ -129,20 +164,21 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
 
     global path
 
-    path = dijkstra (mazeMap, playerLocation, coins[0])
-    debug (path)
+    path = parcours_en_largeur (mazeMap, playerLocation, coins[0])
     st = path.pop()
-    
+
     if (st != playerLocation):
         return "BUG!"
     return "Everything seems fine, let's start !"
 
 
 def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
-
     global path
     nextPos = path.pop()
-    return 
+    nextDir = CONV_KEY[nextpostodir(nextPos, playerLocation, mazeMap)] 
+
+    return nextDir
+    
 
 
 
@@ -167,4 +203,3 @@ if __name__ == "__main__" :
             break
         nextMove = determineNextMove(mazeWidth, mazeHeight, mazeMap, turnTime, playerLocation, opponentLocation, coins)
         writeToPipe(nextMove)
-
