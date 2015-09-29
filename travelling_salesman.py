@@ -81,17 +81,18 @@ last_positions = []
 
 # Fonction intermédiaire pour parcours_en_largeur
 # trie le dictionnaire des meilleurs sommets pour en faire une liste compréhensible plus facilement
-def ordonne (best_vert, start, stop, path):
+def ordonne (best_vert, start, stop, path, dist):
     if start == stop:
-        return path + [start]
+        return path + [start], dist
 
-    return ordonne (best_vert, start, best_vert[stop][0], path + [stop]) 
+    return ordonne (best_vert, start, best_vert[stop][0], path + [stop], dist+best_vert[stop][1]) 
+
 
 
 # Réalise le parcours en largeur de la map et retourne la liste ordonée des sommets à suivre
-def parcours_en_largeur (mazeMap, playerLocation, coinLocation) :
-    best_vertice = {(playerLocation):((),0)}
-    to_see_vertice = [playerLocation]
+def dijkstra (mazeMap, startLocation, stopLocation) :
+    best_vertice = {(startLocation):((),0)}
+    to_see_vertice = [startLocation]
     
     while to_see_vertice :
         vertex = to_see_vertice.pop(0)
@@ -103,7 +104,8 @@ def parcours_en_largeur (mazeMap, playerLocation, coinLocation) :
                 best_vertice[v] = (vertex, d + dist)
                 to_see_vertice.append(v)
 
-    return ordonne(best_vertice, playerLocation, coinLocation, [])
+    return ordonne(best_vertice, startLocation, stopLocation, [], 0)
+
 
 
 def debugmap(best_vertice,height_map):
@@ -161,14 +163,26 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
     to = time.time()
     global path
 
-    path = parcours_en_largeur (mazeMap, playerLocation, coins[0])
-    st = path.pop()
+    # Construction d'un meta-graphe
+    sommets = [playerLocation] + coins
+    
+    meta_graphe = {}
+    meilleurs_chemins = {}
 
-    if (st != playerLocation):
-        return "BUG!"
+    for i in sommets:
+        for j in sommets:
+            if j != i:
+                chemin, distance = dijkstra(mazeMap, i,j)
+                meilleurs_chemins[i].append((j,chemin))
+                meta_graphe[i].append((j, distance))
+
+        sommets.remove(i)
 
     elapsed = time.time() - to
     debug(elapsed)
+
+    debug(meta_graphe)
+
     return "Everything seems fine, let's start !"
 
 

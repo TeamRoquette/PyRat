@@ -5,6 +5,7 @@
 import ast
 import sys
 import os
+import queue as q
 import time
 
 CONV_KEY = ['U', 'R', 'D', 'L']
@@ -91,17 +92,22 @@ def ordonne (best_vert, start, stop, path):
 # Réalise le parcours en largeur de la map et retourne la liste ordonée des sommets à suivre
 def parcours_en_largeur (mazeMap, playerLocation, coinLocation) :
     best_vertice = {(playerLocation):((),0)}
-    to_see_vertice = [playerLocation]
-    
-    while to_see_vertice :
-        vertex = to_see_vertice.pop(0)
-        voisins = mazeMap[vertex]
-        dist = best_vertice.get(vertex, ([], float('inf')))[1]
-        
-        for (v,d) in voisins :
-            if best_vertice.get(v, ([], float('inf')))[1] > d + dist :
-                best_vertice[v] = (vertex, d + dist)
-                to_see_vertice.append(v)
+    seen_vertice = []
+    to_see_vertice = q.Queue()
+    to_see_vertice.put(playerLocation)
+
+    while not to_see_vertice.empty() :
+        vertex = to_see_vertice.get()
+        if vertex not in seen_vertice :
+            voisins = mazeMap[vertex]
+            dist = best_vertice.get(vertex, ([], float('inf')))[1]
+            
+            for (v,d) in voisins :
+                if best_vertice.get(v, ([], float('inf')))[1] > d + dist :
+                    best_vertice[v] = (vertex, d + dist)
+                    
+                seen_vertice.append(vertex)
+                to_see_vertice.put(v)
 
     return ordonne(best_vertice, playerLocation, coinLocation, [])
 
@@ -125,8 +131,6 @@ def debugmap(best_vertice,height_map):
         l+='\n'
             
     debug(l+'\n\n\n')
-
-
 
 # Détermine la direction pour rallier next_pos depuis actual_pos, 
 # Renvoie ERROR si cela n'est pas possible
@@ -158,7 +162,8 @@ def nextpostodir (next_pos, actual_pos, mazeMap):
 
 
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
-    to = time.time()
+    t0 = time.time()
+
     global path
 
     path = parcours_en_largeur (mazeMap, playerLocation, coins[0])
@@ -167,7 +172,7 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
     if (st != playerLocation):
         return "BUG!"
 
-    elapsed = time.time() - to
+    elapsed = time.time() - t0
     debug(elapsed)
     return "Everything seems fine, let's start !"
 
