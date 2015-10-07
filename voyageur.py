@@ -72,7 +72,7 @@ def processNextInformation () :
 ### MY STUFF ###
 ##############
 
-
+DEPTH_MAX_IN_TRAVEL = 10
 moving = False
 path = []
 last_directions = []
@@ -82,6 +82,7 @@ meta_graph = {}
 best_pathes = {}
 best_path_cost = float('inf')
 best_path_nodes = [] 
+
 
 # Fonction intermédiaire pour parcours_en_largeur
 # trie le dictionnaire des meilleurs sommets pour en faire une liste compréhensible plus facilement
@@ -176,11 +177,11 @@ def make_meta_graph (mazeMap, playerLocation, coins):
 
 
 
-def voyageur_naif(meta_graph, node_start, nodes, cost, path):
+def voyageur_naif(meta_graph, node_start, nodes, cost, path, depth):
     global best_path_cost
     global best_path_nodes
 
-    if not nodes:
+    if not nodes or depth < DEPTH_MAX_IN_TRAVEL:
         if cost <= best_path_cost:
             best_path_cost = cost
             best_path_nodes = path
@@ -188,7 +189,7 @@ def voyageur_naif(meta_graph, node_start, nodes, cost, path):
         for node in nodes:
             nodes_to_see = list(nodes)
             nodes_to_see.remove(node)
-            voyageur_naif(meta_graph, node, nodes_to_see, cost + meta_graph[node_start][node], path+[node])
+            voyageur_naif(meta_graph, node, nodes_to_see, cost + meta_graph[node_start][node], path+[node], depth+1)
 
 
 
@@ -223,7 +224,7 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
 
 
     # Création du chemin par l'algo naif
-    voyageur_naif(meta_graph, playerLocation, nodes_to_compute[:9], 0, [])
+    voyageur_naif(meta_graph, playerLocation, nodes_to_compute, 0, [])
 
 
     t2 = time.time() #timers finaux
