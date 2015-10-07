@@ -6,6 +6,7 @@ import ast
 import sys
 import os
 import time
+import operator
 
 CONV_KEY = ['U', 'R', 'D', 'L']
 ERROR = -1
@@ -72,11 +73,13 @@ def processNextInformation () :
 ### MY STUFF ###
 ##############
 
-DEPTH_MAX_IN_TRAVEL = 10
+
+# Comportement général
+NB_COINS_TO_COMPUTE = 5
 moving = False
 path = []
-last_directions = []
-last_positions = []
+
+# Parcours du meta_graphe
 eaten_coins = []
 meta_graph = {}
 best_pathes = {}
@@ -84,7 +87,14 @@ best_path_cost = float('inf')
 best_path_nodes = [] 
 
 
-# Fonction intermédiaire pour parcours_en_largeur
+
+###
+### ALGO POUR LE CALCUL DU PLUS COURT CHEMIN
+###
+
+
+
+# Fonction intermédiaire pour dijkstra
 # trie le dictionnaire des meilleurs sommets pour en faire une liste compréhensible plus facilement
 def ordonne (best_vert, start, stop, path):
     if start == stop:
@@ -113,35 +123,13 @@ def dijkstra (mazeMap, startLocation, stopLocation) :
 
 
 
-# Détermine la direction pour rallier next_pos depuis actual_pos, 
-# Renvoie ERROR si cela n'est pas possible
-def nextpostodir (next_pos, actual_pos, mazeMap):
-    # Check if next position is reachable
-    next_poses = mazeMap[actual_pos]
-    reachable = False
-    for (pos, d) in next_poses:
-        if pos == next_pos:
-            reachable = True
-    
-    if not reachable:
-        return ERROR
-
-    (y_act, x_act) = actual_pos
-    (y_next, x_next) = next_pos
-    
-    if x_act == x_next:
-        if y_next > y_act:
-            return DOWN
-        else:
-            return UP
-    else:
-        if x_next > x_act:
-            return RIGHT
-        else:
-            return LEFT
+###
+### ALGO POUR PROBLEME DU VOYAGEUR
+###
 
 
 
+# Crée le méta_graph des pièces, renvoie le méta graphe et les meilleurs chemins
 def make_meta_graph (mazeMap, playerLocation, coins):
     sommets = [playerLocation] + coins
     
@@ -176,23 +164,70 @@ def make_meta_graph (mazeMap, playerLocation, coins):
     return meta_graph, best_ways
 
 
-
-def voyageur_naif(meta_graph, node_start, nodes, cost, path, depth):
+# Résoud de manière naive le probleme du voyageur, modifie les variables globales pour le meilleur chemin
+def voyageur_naif(node_start, nodes, cost, path):
     global best_path_cost
     global best_path_nodes
 
-    if not nodes or depth < DEPTH_MAX_IN_TRAVEL:
-        if cost <= best_path_cost:
+    if not nodes:
+        if cost < best_path_cost:
             best_path_cost = cost
             best_path_nodes = path
     else:
         for node in nodes:
             nodes_to_see = list(nodes)
             nodes_to_see.remove(node)
-            voyageur_naif(meta_graph, node, nodes_to_see, cost + meta_graph[node_start][node], path+[node], depth+1)
+            voyageur_naif(node, nodes_to_see, cost + node[1], path+[node[0]])
 
 
 
+###
+### ALGOS DE COMPORTEMENTS GENERAUX
+###
+
+
+
+# Détermine la direction pour rallier next_pos depuis actual_pos, 
+# Renvoie ERROR si cela n'est pas possible
+def nextpostodir (next_pos, actual_pos, mazeMap):
+    # Check if next position is reachable
+    next_poses = mazeMap[actual_pos]
+    reachable = False
+    for (pos, d) in next_poses:
+        if pos == next_pos:
+            reachable = True
+    
+    if not reachable:
+        return ERROR
+
+    (y_act, x_act) = actual_pos
+    (y_next, x_next) = next_pos
+    
+    if x_act == x_next:
+        if y_next > y_act:
+            return DOWN
+        else:
+            return UP
+    else:
+        if x_next > x_act:
+            return RIGHT
+        else:
+            return LEFT
+
+
+
+# Ordonne les noeuds selon la distance en pcc depuis le currentNode, retourne une liste de tuples (noeuds, distance)
+def ordonneNodes(metaGraph, currentNode):
+    temp = metaGraph[currentNode]
+
+    nodesList = [x for x in list(temp.items()) if x[0] not in eaten_coins]
+
+    nodesList.sort(key = operator.itemgetter(1))
+    return nodesList
+
+
+
+# Mets à jour la liste des pièces mangées en fonction de la position d'un joueur
 def update_coins (eaten_coins, elLocation):
 
     if elLocation in meta_graph:
@@ -201,7 +236,30 @@ def update_coins (eaten_coins, elLocation):
     return eaten_coins
 
 
+
+# Détermine les prochaines pièces et renvoie la prochaine pièce
+def chooseCoin (playerLocation):
+    global best_path_nodes
+    global best_path_cost
+
+    best_path_cost = float('inf')
+    best_path_nodes = []
+
+    # Determination des sommets à calculer avec l'algo naif
+    nodes_to_compute = ordonneNodes(meta_graph, playerLocation)
+
     
+    # Création du chemin par l'algo naif
+    voyageur_naif(playerLocation, nodes_to_compute[:NB_COINS_TO_COMPUTE -1], 0, [])
+
+    return best_path_nodes[0]
+
+###
+###
+###
+
+
+
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
     t0 = time.time() #timer initial
 
@@ -210,29 +268,18 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
 
     # Construction d'un meta-graphe
     meta_graph, best_pathes = make_meta_graph(mazeMap, playerLocation, coins)
-
-
-    # Determination des sommets à calculer avec l'algo naif
-    ## TODO : selectionner les 10 plus proches sommets
-    nodes_in_mg = list(meta_graph.keys())
-    nodes_to_compute = list(nodes_in_mg)
-    nodes_to_compute.remove(playerLocation)
     
-
-    t1 = time.time() #timer intermédiaire
-    debug(t1-t0)
-
-
-    # Création du chemin par l'algo naif
-    voyageur_naif(meta_graph, playerLocation, nodes_to_compute, 0, [])
-
-
-    t2 = time.time() #timers finaux
-    debug(t2-t1) 
-    debug(t2-t0) 
+    t3 = time.time() #timers finaux
+    debug(t3-t0) 
 
         
     return "Everything seems fine, let's start !"
+
+
+
+###
+###
+###
 
 
 
@@ -246,24 +293,24 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
 
     # Si l'ennemi mange une pièce en chocolat, on la comp(o)te
     eaten_coins = update_coins(eaten_coins, opponentLocation)
+    # Si on a mangé une pièce en chocolat, on la comp(o)te
+    eaten_coins = update_coins(eaten_coins, playerLocation)
+
 
     if moving: 
         if not path :
             moving = False
 
-    # Si on n'a plus d'objectif, on cherche la plus proche pièce
+    # Si on n'a plus d'objectif
     if not moving :
 
         # On choisit la prochaine plus proche pièce
-        plusprochepiece = best_path_nodes.pop()
+        nextCoin = chooseCoin(playerLocation)
 
         # On récupère le chemin pour aller a cette pièce
-        path = best_pathes[playerLocation][plusprochepiece]
-        
+        path = best_pathes[playerLocation][nextCoin]
+        ## TODO: faire des testes ici...
         path.pop() # on enlève le premier élt qui est la position actuelle
-
-        # Si on a mangé une pièce en chocolat, on la comp(o)te
-        eaten_coins = update_coins(eaten_coins, playerLocation)
 
         moving = True
                 
