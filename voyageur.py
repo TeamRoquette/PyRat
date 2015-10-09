@@ -7,6 +7,10 @@ import sys
 import os
 import time
 import operator
+from multiprocessing.pool import ThreadPool as Pool
+#import _thread as thd
+
+
 
 CONV_KEY = ['U', 'R', 'D', 'L']
 ERROR = -1
@@ -19,6 +23,8 @@ LEFT = 3
 
 TEAM_NAME = "Team Roquette"
 
+NB_COINS_TO_COMPUTE = 5
+POOL_SIZE = 5
 
 
 
@@ -75,7 +81,6 @@ def processNextInformation () :
 
 
 # Comportement général
-NB_COINS_TO_COMPUTE = 5
 moving = False
 path = []
 
@@ -85,6 +90,9 @@ meta_graph = {}
 best_pathes = {}
 best_path_cost = float('inf')
 best_path_nodes = [] 
+
+# Multi-tasking
+pool = Pool(POOL_SIZE)
 
 
 
@@ -131,6 +139,12 @@ def dijkstra (mazeMap, startLocation, stopLocation) :
 
 # Crée le méta_graph des pièces, renvoie le méta graphe et les meilleurs chemins
 def make_meta_graph (mazeMap, playerLocation, coins):
+    #if thread okay
+    make_meta_graph_multithread (mazeMap, playerLocation, coins)
+
+    
+    
+def make_meta_graph_monothread (mazeMap, playerLocation, coins):
     sommets = [playerLocation] + coins
     
     meta_graph = {}
@@ -162,6 +176,55 @@ def make_meta_graph (mazeMap, playerLocation, coins):
         i -= 1            
     
     return meta_graph, best_ways
+
+
+
+def updateMetaGraph_thread_fun (start, stop):
+    global meta_graph
+    global best_pathes
+    
+    chemin, distance = dijkstra(mazeMap, start, stop)
+    if start not in best_ways :
+        best_pathes[start]  = {}
+        meta_graph[stop] = {}
+        
+    if stop not in best_ways :
+        best_pathes[stop]  = {}
+        meta_graph[stop] = {}
+        
+    meta_graph[start][stop] = distance
+    best_pathes[start][stop]  = chemin
+    
+    meta_graph[start][stop] = distance
+    best_pathes[start][stop]  = chemin[::-1]
+
+    debug("Finish!")
+
+
+    
+def make_meta_graph_multithread (mazeMap, playerLocation, coins):
+    sommets = [playerLocation] + coins
+    
+    #meta_graph = {}
+    #best_ways  = {}
+
+    i = len(sommets)-1
+    while i >= 0:
+
+        j = 0
+        while j < i:
+
+            pool.apply_async( updateMetaGraph_thread_fun, (sommets[i], sommets[j],))
+
+            j += 1
+        
+        i -= 1            
+
+    pool.close()
+    pool.join()
+    
+    #return meta_graph, best_ways
+
 
 
 # Résoud de manière naive le probleme du voyageur, modifie les variables globales pour le meilleur chemin
@@ -267,7 +330,8 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
     global best_pathes
 
     # Construction d'un meta-graphe
-    meta_graph, best_pathes = make_meta_graph(mazeMap, playerLocation, coins)
+    #meta_graph, best_pathes = make_meta_graph(mazeMap, playerLocation, coins)
+    make_meta_graph(mazeMap, playerLocation, coins)
     
     t3 = time.time() #timers finaux
     debug(t3-t0) 
