@@ -11,7 +11,7 @@ def orderPath (nodesDict, start, stop, path):
     if start == stop:
         return path + [start]
 
-    return ordonne (nodesDict, start, nodesDict[stop][0], path + [stop])
+    return orderPath (nodesDict, start, nodesDict[stop][0], path + [stop])
 
 
 
@@ -26,9 +26,9 @@ def dijkstra (mazeMap, startLocation, stopLocation) :
         
         for (n,d) in neighbours :
             if bestNodes.get(n, ([], float('inf')))[1] > d + dist :
-                bestNodes[v] = (vertex, d + dist)
-                toseeNodes.append(v)
+                bestNodes[n] = (node, d + dist)
+                toseeNodes.append(n)
 
-    return ordonne(bestNodes, startLocation, stopLocation, []), bestNodes[stopLocation][1]
+    return orderPath(bestNodes, startLocation, stopLocation, []), bestNodes[stopLocation][1]
 
 

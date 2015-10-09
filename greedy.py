@@ -2,29 +2,96 @@
 # -*- coding: utf-8 -*-
 
 import lib.PyratApi as api
+import lib.travelHeuristics as th
+import lib.utils as ut
 
-BOT_NAME = "Template"
+import time
+import operator
+
+BOT_NAME = "greedy"
+PATH = []
+METAGRAPH = {}
+BESTPATH = {}
+MOVING = False
+EATENCOINS = []
+NB_COINS_TO_COMPUTE = 5
+
 
 
 # This function should not return anything, but should be used for a short preprocessing
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
+    global METAGRAPH
+    global BESTPATHS
+    iniTime = time.time()
+    METAGRAPH, BESTPATHS = th.generateMetaGraph(mazeMap, playerLocation, coins)
+    api.debug(time.time() - iniTime)
+    return "Everything seems fine, let's start !"
 
-    api.debug("\n" + "mazeWidth = " + str(mazeWidth) + "\n"
-               + "mazeHeight = " + str(mazeHeight) + "\n"
-               + "mazeMap = " + str(mazeMap) + "\n"
-               + "timeAllowed = " + str(timeAllowed) + "\n"
-               + "playerLocation = " + str(playerLocation) + "\n"
-               + "opponentLocation = " + str(opponentLocation) + "\n"
-               + "coins = " + str(coins))
+
+
+def updateCoins (metaGraph, eatenCoins, elLocation):
+
+    if elLocation in metaGraph:
+        eatenCoins.append(elLocation)
+    
+    return eatenCoins
+
+
+
+def orderNodes(metaGraph, currentNode, eatenCoins):
+
+    temp = metaGraph[currentNode]
+
+    nodesList = [x for x in list(temp.items()) if x[0] not in eatenCoins]
+
+    nodesList.sort(key = operator.itemgetter(1))
+    return nodesList
+
+
+
+def chooseCoin (metaGraph, playerLocation, eatenCoins):
+
+    # Determination des sommets à calculer avec l'algo naif
+    nodesToCompute = orderNodes(metaGraph, playerLocation, eatenCoins)
+
+    
+    # Création du chemin par l'algo naif
+    besDis, bestPaths =  th.travellingSalesman(playerLocation, nodesToCompute[:NB_COINS_TO_COMPUTE -1], 0, [])
+
+    return bestPaths[0]
 
 
 
 # This is where you should write your code to determine the next direction
 def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
+    global MOVING
+    global METAGRAPH
+    global BESTPATHS
+    global EATENCOINS
+    global PATH
+    
+    EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
+    EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, playerLocation)
 
-    return api.UP
+    if MOVING :
+        if not PATH :
+            MOVING = False
+    
+    if not MOVING :
+        nextCoin = chooseCoin(METAGRAPH, playerLocation, EATENCOINS)
+
+        PATH = BESTPATHS[playerLocation][nextCoin]
+        PATH.pop()
+        
+        MOVING = True
+    
+    nextPos = PATH.pop()
+
+    return ut.convertPosesToDir(nextPos, playerLocation, mazeMap)
 
 
+
+####
 
 
 
