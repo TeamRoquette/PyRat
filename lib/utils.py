@@ -69,6 +69,7 @@ def getAbsoluteFromRelativeDir (dir1, dir2):
     Return the absolute directions when you want the relative dir2 from dir1.
     First arg must be dir1 implemented as api's directions, second is dir2.
     """
+
     relativesDir = {api.UP: 0, api.RIGHT: 1, api.DOWN: 2, api.LEFT: 3}
     
     return (relativesDir[dir1] + relativesDir[dir2]) % 4
