@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import PyratApi as api
+import lib.PyratApi as api
 
 
 
@@ -53,14 +53,14 @@ def convertPosesToDir (actualPos, nextPos, graph):
     
     if xAct == xNext:
         if yNext > yAct:
-            return api.DOWN
-        else:
             return api.UP
+        else:
+            return api.DOWN
     else:
         if xNext > xAct:
-            return api.RIGHT
-        else:
             return api.LEFT
+        else:
+            return api.RIGHT
 
         
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import shortestPaths as sp
+import lib.shortestPaths as sp
 
 
 def generateMetaGraph (mazeMap, playerLocation, coins):
@@ -21,14 +21,14 @@ def generateMetaGraph (mazeMap, playerLocation, coins):
             
             path, distance = sp.dijkstra(mazeMap, nodes[i], nodes[j])
             if nodes[i] not in bestPaths :
-                bestPaths[nodes[i]]  = {}
-                metaGraph[nodess[i]] = {}
+                bestPaths[nodes[i]] = {}
+                metaGraph[nodes[i]] = {}
                 
-            if nodes[j] not in bestWays :
-                bestPaths[nodes[j]]  = {}
+            if nodes[j] not in bestPaths :
+                bestPaths[nodes[j]] = {}
                 metaGraph[nodes[j]] = {}
                     
-            metaGraph[nodes[i]][nodess[j]] = distance
+            metaGraph[nodes[i]][nodes[j]] = distance
             bestPaths[nodes[i]][nodes[j]]  = path
 
             metaGraph[nodes[j]][nodes[i]] = distance
@@ -41,22 +41,35 @@ def generateMetaGraph (mazeMap, playerLocation, coins):
     return metaGraph, bestPaths
 
 
-def TravellingSalesman(nodeStart, nodesn distance, path):
+
+bestDistance = float('inf')
+bestPaths = []
+
+def auxi(nodeStart, nodes, distance, path):
+    global bestDistance
+    global bestPaths
+    
+    if not nodes:
+        if distance < bestDistance:
+            bestDistance = distance
+            bestPaths = path
+    else:
+        for node in nodes:
+            toseeNodes = list(nodes)
+            toseeNodes.remove(node)
+            auxi(node, toseeNodes, distance + node[1], path+[node[0]])
+
+
+
+def travellingSalesman(nodeStart, nodes, distance, path):
     """
     Implementation of the travelling salesman problem algorithm.  
     """
+    global bestDistance
+    global bestPaths
+
     bestDistance = float('inf')
     bestPaths = []
-
-    def auxi(nodeStart, nodes, distance, path):        
-        if not nodes:
-            if distance < bestDistance:
-                bestDistance = distance
-                bestPaths = path
-            else:
-                for node in nodes:
-                    toseeNodes =  list(nodes)
-                    toseeNodes.remove(node)
-                    auxi(node, toseeNodes, distance + node[1], path+[node[0]])
+                
     auxi(nodeStart, nodes, distance, path)
     return bestDistance, bestPaths
