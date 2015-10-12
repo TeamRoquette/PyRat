@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import lib.shortestPaths as sp
+import lib.PyratApi as a
+import time
+
 
 
 def generateMetaGraph (mazeMap, playerLocation, coins):
@@ -9,6 +12,9 @@ def generateMetaGraph (mazeMap, playerLocation, coins):
     Generate a metaGraph from mazeMap, containing all coins and the player.
     This function is built on the  shortestPaths lib.
     """
+
+    t0 = time.time()
+    
     nodes = [playerLocation] + coins
     metaGraph = {}
     bestPaths  = {}
@@ -18,7 +24,7 @@ def generateMetaGraph (mazeMap, playerLocation, coins):
 
         j = 0
         while j < i:
-            
+            t1 = time.time()
             path, distance = sp.dijkstra(mazeMap, nodes[i], nodes[j])
             if nodes[i] not in bestPaths :
                 bestPaths[nodes[i]] = {}
@@ -35,9 +41,11 @@ def generateMetaGraph (mazeMap, playerLocation, coins):
             bestPaths[nodes[j]][nodes[i]]  = path[::-1]
 
             j += 1
+            a.debug(time.time() - t1)
         
         i -= 1            
-    
+
+    a.debug(time.time() - t0)
     return metaGraph, bestPaths
 
 

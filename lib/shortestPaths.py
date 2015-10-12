@@ -5,7 +5,7 @@
 
 def orderPath (nodesDict, start, stop, path):
     """
-    Internal function used by dijkstra search or Breadth-first search.
+    Internal function used by dijkstra search or Breadth-First Search.
     Put into order nodes from dictionnary.
     """
     if start == stop:

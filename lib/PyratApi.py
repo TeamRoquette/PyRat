@@ -13,7 +13,7 @@ DOWN = 'D'
 LEFT = 'L'
 
 
-TEAM_NAME = "Team Roquette v2"
+TEAM_NAME = "Team Roquette"
 
 
 
