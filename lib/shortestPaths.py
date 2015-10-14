@@ -5,8 +5,9 @@
 
 def orderPath (nodesDict, start, stop, path):
     """
-    Internal function used by dijkstra search or Breadth-First Search.
-    Put into order nodes from dictionnary.
+    Internal function used by shortestWay to
+    put into order nodes from the routing table.
+    Return the shortest path from start to stop
     """
     if start == stop:
         return path + [start]
@@ -15,7 +16,10 @@ def orderPath (nodesDict, start, stop, path):
 
 
 
-def dijkstra (mazeMap, startLocation, stopLocation) :
+def dijkstra (mazeMap, startLocation) :
+    """
+    Return the routing table of every nodes sarting from startLocation.
+    """
     bestNodes = {(startLocation):((),0)}
     toseeNodes = [startLocation]
     
@@ -29,6 +33,13 @@ def dijkstra (mazeMap, startLocation, stopLocation) :
                 bestNodes[n] = (node, d + dist)
                 toseeNodes.append(n)
 
-    return orderPath(bestNodes, startLocation, stopLocation, []), bestNodes[stopLocation][1]
+    return bestNodes
 
 
+
+def shortestWay (mazeMap, startLocation, stopLocation):
+    """
+    Return the shortest path from startLocation to stopLocation.
+    Use dijkstra algorithm.
+    """
+    return orderPath (dijkstra (mazeMap, startLocation), startLocation, stopLocation, [])
