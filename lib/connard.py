@@ -8,6 +8,13 @@ import lib.PyratApi as api
 
 
 
+
+  ############
+ ### KILL ###
+###########
+
+
+
 def handlerDoNothing (signum, frame):
     api.debug ("Sir, someone's trying to kill me !")
 
@@ -18,17 +25,35 @@ def preventFromKilling():
     signal.signal(signal.SIGILL, handlerDoNothing)
 
 
-    
+
+def getPidsToKkill():
+    pids = check_output(["pidof", "python3"])
+    mypid = os.getpid()
+    return [int(i) for i in pids if int(i)!=mypid]
+
+
+
+
 def stopOpponent():
-    return
+    pids = getPidsToKill()
+    for pid in pids:
+        os.kill(pid, signal.SIGSTOP)
 
 
 
 def resumeOpponent():
-    return
+    pids = getPidsToKill()
+    for pid in pids:
+        os.kill(pid, signal.SIGCONT)    
 
 
-    
+
+  ############
+ ### MOTD ###
+###########
+
+
+
 def displayMotd():
     motd = open("inputFiles/TeamRoquette/motd.txt", "r")
     api.debug(motd.read())

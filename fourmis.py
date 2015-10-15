@@ -8,7 +8,7 @@ import lib.utils as ut
 import time
 import operator
 
-BOT_NAME = "fourmis"
+BOT_NAME = "Antbot"
 PATH = []
 METAGRAPH = {}
 BESTPATH = {}
@@ -20,10 +20,12 @@ NB_COINS_TO_COMPUTE = 5
 
 # This function should not return anything, but should be used for a short preprocessing
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
+    iniTime = time.time()
     global METAGRAPH
     global BESTPATHS
-    iniTime = time.time()
+    
     METAGRAPH, BESTPATHS = th.generateMetaGraph(mazeMap, playerLocation, coins)
+
     api.debug(time.time() - iniTime)
     return "Everything seems fine, let's start !"
 
