@@ -15,7 +15,7 @@ BESTPATH = {}
 MOVING = False
 EATENCOINS = []
 NB_COINS_TO_COMPUTE = 5
-
+CURRENTCOIN = []
 
 
 # This function should not return anything, but should be used for a short preprocessing
@@ -69,6 +69,7 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     global BESTPATHS
     global EATENCOINS
     global PATH
+    global CURRENTCOIN
     
     EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
     EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, playerLocation)
@@ -76,11 +77,15 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     if MOVING :
         if not PATH :
             MOVING = False
+        
+        if opponentLocation == CURRENTCOIN and playerLocation != CURRENTCOIN:
+            PATH = []
+            PATH = th.findNearestCoin(mazeMap, playerLocation, coins)
     
     if not MOVING :
-        nextCoin = chooseCoin(METAGRAPH, playerLocation, EATENCOINS)
+        CURRENTCOIN = chooseCoin(METAGRAPH, playerLocation, EATENCOINS)
 
-        PATH = BESTPATHS[playerLocation][nextCoin]
+        PATH = BESTPATHS[playerLocation][CURRENTCOIN]
         PATH.pop()
         
         MOVING = True

@@ -78,3 +78,18 @@ def travellingSalesman(nodeStart, nodes, distance, path):
                 
     auxi(nodeStart, nodes, distance, path)
     return bestDistance, bestPaths
+
+
+
+def findNearestCoin(mazeMap, playerLocation, coinsList):
+    
+    routingTable = sp.dijkstra(mazeMap, playerLocation)
+    
+    nearest = -1
+    distance = float('inf')
+    for coin in coinsList:
+        if routingTable[coin][1] < distance :
+            distance = routingTable[coin][1] < distance
+            nearest = coin
+    
+    return sp.orderPath(routingTable, playerLocation, nearest, [])
