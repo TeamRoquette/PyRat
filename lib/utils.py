@@ -73,4 +73,21 @@ def getAbsoluteFromRelativeDir (dir1, dir2):
     relativesDir = {api.UP: 0, api.RIGHT: 1, api.DOWN: 2, api.LEFT: 3}
     
     return (relativesDir[dir1] + relativesDir[dir2]) % 4
+
+
+
+#
+def weightedChoice (probas):
+    from random import uniform
     
+    s = sum([p[1] for p in probas])
+
+    # We choose in this newly uniform density of probability
+    r = uniform(0, s)
+
+    upto = 0
+    for c, w in choices:
+        if upto + w > r:
+            return c
+        upto += w
+    assert False, "Error in calculation of probability density"

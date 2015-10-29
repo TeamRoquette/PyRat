@@ -9,26 +9,138 @@ import time
 import operator
 
 BOT_NAME = "Antbot"
+
+# Global variable for general behaviour
 PATH = []
 METAGRAPH = {}
+FORMIC_META_GRAPH = {}
 BESTPATH = {}
 MOVING = False
 EATENCOINS = []
-NB_COINS_TO_COMPUTE = 5
+
+
+# CONSTANTS for ACO
+NB_ANTS = 10
+NB_GROUPS_ANTS = 10
+ACO_FACTOR_PHERO = 3
+ACO_FACTOR_DIST = 1
+ACO_FACTOR_EVAP = 0.3
+ACO_FACTOR_Q = 9
+
+
+
+#
+def initFormicMetaGraph (metaGraph) :
+    """
+    This function initalizes and retruns a formic meta graph which is a meta graph containing simultaneously the distance between
+    two nodes and the amount of pheromones in the vertice.
+    """
+    # We realise a deep copy of metaGraph and add a component to the 2nd dim
+    fmg = { (pos1) : { pos2 : [metaGraph[pos1][pos2], 0] for pos2 in metaGraph[pos1].keys() } for pos1 in metaGraph.keys() }
+
+    return fmg
+
+
+
+#
+def addPheroFormicMetaGraph (fmg, path) :
+    """
+    These functions updates the formic meta graph by assuming a ant realised the path in argument.
+    We need the fundamental constant of ACO to be defined in the global scope. 
+    """
+    lenPath = len(path)
+    prevPos = path.pop(0)
+
+    for pos in path:
+        fmg[prevPos][pos][1] += ACO_FACTOR_Q/lenPath
+
+        prevPos = pos
+
+    return fmg
+
+
+
+#
+def evapPheroFormicMetaGraph (fmg) :
+    for pos1 in fmg:
+        for pos2 in fmg[pos1]:
+            fmg[pos1][pos2][1] *= (1-ACO_FACTOR_EVAP)
+
+    return fmg
+
+
+
+#
+def mypow(a,b):
+    if a != 0:
+        return a**b
+    return 1
+
+
+
+#
+def antColonyOptimization (metaGraph, startPos) :
+    """
+    This function is a metaheuristic to solve the travelling salesman problem by simulating a colony of ants.
+    It returns the best way provided by these approximation.
+    """
+    
+    formicMetaGraph = initFormicMetaGraph (metaGraph)
+
+    # For each groups of ants
+    for i in range (NB_GROUPS_ANTS) :
+        api.debug("Groupe "+str(i))
+        pathes = []
+        # For each ants:
+        for j in range (NB_ANTS) :
+            api.debug("    Fourmis "+str(j))
+            pos = startPos
+            path = [startPos]
+            posesToVisit = list(metaGraph[pos].keys())
+
+            # We use the ant density of probability to determine every next step.
+            while posesToVisit :
+                probas = [(posToVisit, mypow(formicMetaGraph[pos][posToVisit][1],ACO_FACTOR_PHERO)/mypow(formicMetaGraph[pos][posToVisit][0],ACO_FACTOR_DIST)) for posToVisit in posesToVisit]
+                posToGo = ut.weightedChoice(probas)
+                #api.debug ("        Probas : " +str(probas))
+                api.debug("        Decided to go to "+str(posToGo))
+                path.append (posToGo)
+                posesToVisit.remove (posToGo)
+
+            api.debug("Chemin ajouté : "+str(path))
+            pathes.append (path)
+            
+
+        # Finally we update the fmg with all pathes realized
+        formicMetaGraph = evapPheroFormicMetaGraph (formicMetaGraph)
+        for path in pathes:
+            formicMetaGraph = addPheroFormicMetaGraph (formicMetaGraph, path)
+
+
+    return formicMetaGraph
 
 
 
 # This function should not return anything, but should be used for a short preprocessing
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
-    iniTime = time.time()
+    t0 = time.time()
     global METAGRAPH
     global BESTPATHS
+    global FORMIC_META_GRAPH
     
     METAGRAPH, BESTPATHS = th.generateMetaGraph(mazeMap, playerLocation, coins)
 
-    api.debug(time.time() - iniTime)
-    return "Everything seems fine, let's start !"
+    t1 = time.time()
+    api.debug(t1 - t0)
 
+    
+    FORMIC_META_GRAPH = antColonyOptimization (METAGRAPH, playerLocation)
+
+    t2 = time.time()
+    api.debug(t2 - t1)
+    api.debug(t2 - t0)
+
+    api.debug(FORMIC_META_GRAPH)
 
 
 def updateCoins (metaGraph, eatenCoins, elLocation):
@@ -40,37 +152,16 @@ def updateCoins (metaGraph, eatenCoins, elLocation):
 
 
 
-def closestCoins(metaGraph, currentNode, eatenCoins):
-
-    temp = metaGraph[currentNode]
-
-    nodesList = [x for x in list(temp.items()) if x[0] not in eatenCoins]
-
-    nodesList.sort(key = operator.itemgetter(1))
-    return nodesList
-
-
-
-def chooseCoin (metaGraph, playerLocation, eatenCoins):
-
-    # Determination des sommets à calculer avec l'algo naif
-    nodesToCompute = closestCoins(metaGraph, playerLocation, eatenCoins)
-
-    
-    # Création du chemin par l'algo naif
-    besDis, bestPaths =  th.travellingSalesman(playerLocation, nodesToCompute[:NB_COINS_TO_COMPUTE -1], 0, [])
-
-    return bestPaths[0]
-
-
-
 # This is where you should write your code to determine the next direction
 def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
+
     global MOVING
     global METAGRAPH
+    global FORMIC_META_GRAPH
     global BESTPATHS
     global EATENCOINS
     global PATH
+
     
     EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
     EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, playerLocation)
@@ -80,8 +171,8 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
             MOVING = False
     
     if not MOVING :
-        nextCoin = chooseCoin(METAGRAPH, playerLocation, EATENCOINS)
-
+        nextCoin = chooseNextCoin(FORMIC_META_GRAPH)
+        
         PATH = BESTPATHS[playerLocation][nextCoin]
         PATH.pop()
         
@@ -104,7 +195,7 @@ if __name__ == "__main__" :
 
 
     initializationCode(mazeWidth, mazeHeight, mazeMap, preparationTime, playerLocation, opponentLocation, coins)
-    
+
     # We decide how to move and wait for the next step
     while not gameIsOver :
         (playerLocation, opponentLocation, coins, gameIsOver) = api.processNextInformation()

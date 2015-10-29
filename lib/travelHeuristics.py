@@ -68,7 +68,7 @@ def auxi(nodeStart, nodes, distance, path):
 
 def travellingSalesman(nodeStart, nodes, distance, path):
     """
-    Implementation of the travelling salesman problem algorithm.  
+    Implementation of the travelling salesman problem algorithm with naïve try.  
     """
     global bestDistance
     global bestPaths
@@ -82,6 +82,9 @@ def travellingSalesman(nodeStart, nodes, distance, path):
 
 
 def findNearestCoin(mazeMap, playerLocation, coinsList):
+    """
+    Returns the best path for the nearest coins.
+    """
     
     routingTable = sp.dijkstra(mazeMap, playerLocation)
     
