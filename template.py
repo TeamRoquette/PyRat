@@ -32,11 +32,7 @@ if __name__ == "__main__" :
 
 
     initializationCode(mazeWidth, mazeHeight, mazeMap, preparationTime, playerLocation, opponentLocation, coins)
-    
-    # We decide how to move and wait for the next step
-    while not gameIsOver :
-        (playerLocation, opponentLocation, coins, gameIsOver) = api.processNextInformation()
-        if gameIsOver :
-            break
-        nextMove = determineNextMove(mazeWidth, mazeHeight, mazeMap, turnTime, playerLocation, opponentLocation, coins)
-        api.writeToPipe(nextMove)
+
+    # Here magic happens
+    api.mainLoop (determineNextMove, mazeWidth, mazeHeight, mazeMap, turnTime)
+

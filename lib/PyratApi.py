@@ -64,4 +64,18 @@ def initGame(botName):
     
     # We process the initial information and have a delay to compute things using it
     return processInitialInformation()
+
+
+
+def mainLoop (funcDetermineNextMove, mazeWidth, mazeHeight, mazeMap, turnTime):
+    gameIsOver = False
+    
+    while not gameIsOver :
+        (playerLocation, opponentLocation, coins, gameIsOver) = processNextInformation()
+        if gameIsOver :
+            break
+        
+        nextMove = funcDetermineNextMove(mazeWidth, mazeHeight, mazeMap, turnTime, playerLocation, opponentLocation, coins)
+        writeToPipe(nextMove)
+        
     
