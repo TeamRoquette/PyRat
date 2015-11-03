@@ -91,6 +91,7 @@ def antColonyOptimization (metaGraph, startPos) :
     for i in range (NB_GROUPS_ANTS) :
         api.debug("Groupe "+str(i))
         pathes = []
+
         # For each ants:
         for j in range (NB_ANTS) :
             api.debug("    Fourmis "+str(j))
@@ -100,14 +101,16 @@ def antColonyOptimization (metaGraph, startPos) :
 
             # We use the ant density of probability to determine every next step.
             while posesToVisit :
+
                 probas = [(posToVisit, mypow(formicMetaGraph[pos][posToVisit][1],ACO_FACTOR_PHERO)/mypow(formicMetaGraph[pos][posToVisit][0],ACO_FACTOR_DIST)) for posToVisit in posesToVisit]
                 posToGo = ut.weightedChoice(probas)
                 #api.debug ("        Probas : " +str(probas))
                 api.debug("        Decided to go to "+str(posToGo))
+
                 path.append (posToGo)
                 posesToVisit.remove (posToGo)
 
-            api.debug("Chemin ajouté : "+str(path))
+            api.debug("Chemin ajouté : " + str(path))
             pathes.append (path)
             
 
