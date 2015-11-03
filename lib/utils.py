@@ -86,7 +86,7 @@ def weightedChoice (probas):
     r = uniform(0, s)
 
     upto = 0
-    for c, w in choices:
+    for c, w in probas:
         if upto + w > r:
             return c
         upto += w

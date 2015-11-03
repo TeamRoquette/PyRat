@@ -20,8 +20,8 @@ EATENCOINS = []
 
 
 # CONSTANTS for ACO
-NB_ANTS = 10
-NB_GROUPS_ANTS = 10
+ACO_NB_ANTS = 10
+ACO_NB_GROUPS_ANTS = 10
 ACO_FACTOR_PHERO = 3
 ACO_FACTOR_DIST = 1
 ACO_FACTOR_EVAP = 0.3
@@ -88,12 +88,12 @@ def antColonyOptimization (metaGraph, startPos) :
     formicMetaGraph = initFormicMetaGraph (metaGraph)
 
     # For each groups of ants
-    for i in range (NB_GROUPS_ANTS) :
+    for i in range (ACO_NB_GROUPS_ANTS) :
         api.debug("Groupe "+str(i))
         pathes = []
 
         # For each ants:
-        for j in range (NB_ANTS) :
+        for j in range (ACO_NB_ANTS) :
             api.debug("    Fourmis "+str(j))
             pos = startPos
             path = [startPos]
@@ -199,10 +199,5 @@ if __name__ == "__main__" :
 
     initializationCode(mazeWidth, mazeHeight, mazeMap, preparationTime, playerLocation, opponentLocation, coins)
 
-    # We decide how to move and wait for the next step
-    while not gameIsOver :
-        (playerLocation, opponentLocation, coins, gameIsOver) = api.processNextInformation()
-        if gameIsOver :
-            break
-        nextMove = determineNextMove(mazeWidth, mazeHeight, mazeMap, turnTime, playerLocation, opponentLocation, coins)
-        api.writeToPipe(nextMove)
+    # Here magic happens
+    api.mainLoop (determineNextMove, mazeWidth, mazeHeight, mazeMap, turnTime)    
