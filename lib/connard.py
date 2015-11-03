@@ -26,16 +26,16 @@ def preventFromKilling():
 
 
 
-def getPidsToKkill():
-    pids = check_output(["pidof", "python3"])
+def getPids(name):
+    pids = check_output(["pidof", name]).split()
     mypid = os.getpid()
     return [int(i) for i in pids if int(i)!=mypid]
 
 
 
-
 def stopOpponent():
-    pids = getPidsToKill()
+    pids = getPids("python3")
+    api.debug(pids)
     for pid in pids:
         os.kill(pid, signal.SIGSTOP)
 
