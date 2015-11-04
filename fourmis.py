@@ -146,14 +146,6 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
     api.debug(FORMIC_META_GRAPH)
 
 
-def updateCoins (metaGraph, eatenCoins, elLocation):
-
-    if elLocation in metaGraph:
-        eatenCoins.append(elLocation)
-    
-    return eatenCoins
-
-
 
 # This is where you should write your code to determine the next direction
 def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
@@ -166,8 +158,8 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     global PATH
 
     
-    EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
-    EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, playerLocation)
+    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
+    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, playerLocation)
 
     if MOVING :
         if not PATH :

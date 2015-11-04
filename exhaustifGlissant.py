@@ -8,7 +8,7 @@ import lib.utils as ut
 import time
 import operator
 
-BOT_NAME = "greedy"
+BOT_NAME = "exauhsitfGlissant"
 PATH = []
 METAGRAPH = {}
 BESTPATH = {}
@@ -22,37 +22,22 @@ CURRENTCOIN = []
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
     global METAGRAPH
     global BESTPATHS
+
     iniTime = time.time()
+
+    # Compute MetaGraph
     METAGRAPH, BESTPATHS = th.generateMetaGraph(mazeMap, playerLocation, coins)
     api.debug(time.time() - iniTime)
-    return "Everything seems fine, let's start !"
 
-
-
-def updateCoins (metaGraph, eatenCoins, elLocation):
-
-    if elLocation in metaGraph:
-        eatenCoins.append(elLocation)
     
-    return eatenCoins
-
-
-
-def orderNodes(metaGraph, currentNode, eatenCoins):
-
-    temp = metaGraph[currentNode]
-
-    nodesList = [x for x in list(temp.items()) if x[0] not in eatenCoins]
-
-    nodesList.sort(key = operator.itemgetter(1))
-    return nodesList
+    return "Everything seems fine, let's start !"
 
 
 
 def chooseCoin (metaGraph, playerLocation, eatenCoins):
 
     # Determination des sommets à calculer avec l'algo naif
-    nodesToCompute = orderNodes(metaGraph, playerLocation, eatenCoins)
+    nodesToCompute = ut.orderNodesByDistance(metaGraph, playerLocation, eatenCoins)
 
     
     # Création du chemin par l'algo naif
@@ -71,8 +56,8 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     global PATH
     global CURRENTCOIN
     
-    EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
-    EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, playerLocation)
+    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
+    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, playerLocation)
 
     if MOVING :
         if not PATH :

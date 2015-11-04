@@ -23,43 +23,22 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
     global METAGRAPH
     global BESTPATHS
     iniTime = time.time()
+
+    # Compute metaGraph
     METAGRAPH, BESTPATHS = th.generateMetaGraph(mazeMap, playerLocation, coins)
     api.debug(time.time() - iniTime)
+
     return "Everything seems fine, let's start !"
-
-
-
-def updateCoins (metaGraph, eatenCoins, elLocation):
-
-    if elLocation in metaGraph:
-        eatenCoins.append(elLocation)
-    
-    return eatenCoins
-
-
-
-def orderNodes(metaGraph, currentNode, eatenCoins):
-
-    temp = metaGraph[currentNode]
-
-    nodesList = [x for x in list(temp.items()) if x[0] not in eatenCoins]
-
-    nodesList.sort(key = operator.itemgetter(1))
-    return nodesList
 
 
 
 def chooseCoin (metaGraph, playerLocation, eatenCoins):
 
     # Determination des sommets à calculer avec l'algo naif
-    nodesToCompute = orderNodes(metaGraph, playerLocation, eatenCoins)
+    nodesToCompute = ut.orderNodesByDistance(metaGraph, playerLocation, eatenCoins)
 
+    return nodesToCompute[0]
     
-    # Création du chemin par l'algo naif
-    besDis, bestPaths =  th.travellingSalesman(playerLocation, nodesToCompute[:NB_COINS_TO_COMPUTE -1], 0, [])
-
-    return bestPaths[0]
-
 
 
 # This is where you should write your code to determine the next direction
@@ -71,8 +50,8 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     global PATH
     global CURRENTCOIN
     
-    EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
-    EATENCOINS = updateCoins(METAGRAPH, EATENCOINS, playerLocation)
+    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
+    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, playerLocation)
 
     if MOVING :
         if not PATH :
