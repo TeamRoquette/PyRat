@@ -76,7 +76,7 @@ def getAbsoluteFromRelativeDir (dir1, dir2):
 
 
 
-#
+# compute a weighted choice
 def weightedChoice (probas):
     from random import uniform
     
@@ -91,3 +91,39 @@ def weightedChoice (probas):
             return c
         upto += w
     assert False, "Error in calculation of probability density"
+
+
+
+# Sort the list of nodes following the distance form a node.
+def orderNodesByDistance(metaGraph, currentNode, eatenCoins):
+    """
+    orderNodesByDistance:
+    Inputs   : metaGraph (dict of dict of tuple), currentNode (tuple), eatenCoins (list of tuples)
+    Output   : list of tuple
+
+    This function sort the nodes associated to currentNode in metaGraph and not in eatenCoins with the distance between them.
+    """
+
+    temp = metaGraph[currentNode]
+
+    nodesList = [x for x in list(temp.items()) if x[0] not in eatenCoins]
+
+    nodesList.sort(key = operator.itemgetter(1))
+    return nodesList
+
+
+
+# Removes elLocation from metaGraph if elLoc is in it. 
+def updateCoins (metaGraph, eatenCoins, elLocation):
+    """
+    updateCoins:
+    Inputs   : metaGraph (dict of dict of tuple), eatenCoins (list of tuple), eLlocation (tuple)
+    Output   : list of tuple
+
+    The aim of this function is to update eatenCoins adding elLocation if necessary.
+    """
+
+    if elLocation in metaGraph:
+        eatenCoins.append(elLocation)
+    
+    return eatenCoins
