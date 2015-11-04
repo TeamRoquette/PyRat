@@ -4,9 +4,9 @@ mySuperFastAndCleverBot - A PyRat I.A. from Team Roquette
 Description
 -----------
 
-PyRat est un jeu proposé par [Télécom Bretagne](http://formations.telecom-bretagne.eu/pyrat/) 
-dont le but est de programmer une intelligence artificielle. Il s'agit de récuperer des pièces  
-dans un labyrinthe et ce plus rapidement que notre adversaire. 
+PyRat est un jeu proposé par [Télécom Bretagne](http://formations.telecom-bretagne.eu/pyrat/)
+dont le but est de programmer une intelligence artificielle. Il s'agit de récupérer des pièces
+dans un labyrinthe et ce plus rapidement que notre adversaire.
 
 Vous trouverez ici nos I.A.s pour ce jeu.
 
