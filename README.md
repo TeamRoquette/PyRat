@@ -38,4 +38,4 @@ Plusieurs bots sont dispos :
 Auteur/Contact
 --------------
 
-Théo JACQUIN et Quentin JODELET, élève 1A FIG à Télécom Bretagne (et fiers de l'etre).
+Théo JACQUIN et Quentin JODELET, élèves 1A FIG à Télécom Bretagne (et fiers de l'etre).
