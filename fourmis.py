@@ -124,6 +124,12 @@ def antColonyOptimization (metaGraph, startPos) :
 
 
 
+#
+#def chooseNextFormicCoin (fmg):
+    
+
+
+
 # This function should not return anything, but should be used for a short preprocessing
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
     t0 = time.time()
@@ -166,7 +172,7 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
             MOVING = False
     
     if not MOVING :
-        nextCoin = chooseNextCoin(FORMIC_META_GRAPH)
+        nextCoin = chooseNextFormicCoin(FORMIC_META_GRAPH)
         
         PATH = BESTPATHS[playerLocation][nextCoin]
         PATH.pop()
