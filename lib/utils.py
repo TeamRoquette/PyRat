@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import lib.PyratApi as api
-
+import operator
 
 
 def debugMap(graph, height):

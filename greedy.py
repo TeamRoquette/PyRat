@@ -6,7 +6,7 @@ import lib.travelHeuristics as th
 import lib.utils as ut
 
 import time
-import operator
+
 
 BOT_NAME = "greedy"
 PATH = []
@@ -37,7 +37,7 @@ def chooseCoin (metaGraph, playerLocation, eatenCoins):
     # Determination des sommets à calculer avec l'algo naif
     nodesToCompute = ut.orderNodesByDistance(metaGraph, playerLocation, eatenCoins)
 
-    return nodesToCompute[0]
+    return nodesToCompute[0][0]
     
 
 

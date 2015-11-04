@@ -8,7 +8,7 @@ import lib.utils as ut
 import time
 import operator
 
-BOT_NAME = "exauhsitfGlissant"
+BOT_NAME = "exhaustifGlissant"
 PATH = []
 METAGRAPH = {}
 BESTPATH = {}
