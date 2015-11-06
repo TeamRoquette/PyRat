@@ -11,19 +11,20 @@ import operator
 BOT_NAME = "Antbot"
 
 # Global variable for general behaviour
-PATH = []
+GLOBALPATH = []
+ACTUALPATH = []
 METAGRAPH = {}
-FORMIC_META_GRAPH = {}
-BESTPATH = {}
+FORMICMETAGRAPH = {}
+BESTPATHES = {}
 MOVING = False
 EATENCOINS = []
 
 
 # CONSTANTS for ACO
-ACO_NB_ANTS = 10
-ACO_NB_GROUPS_ANTS = 10
-ACO_FACTOR_PHERO = 3
-ACO_FACTOR_DIST = 1
+ACO_NB_ANTS = 50
+ACO_NB_GROUPS_ANTS = 50
+ACO_FACTOR_PHERO = 1
+ACO_FACTOR_DIST = 50
 ACO_FACTOR_EVAP = 0.3
 ACO_FACTOR_Q = 9
 
@@ -89,12 +90,10 @@ def antColonyOptimization (metaGraph, startPos) :
 
     # For each groups of ants
     for i in range (ACO_NB_GROUPS_ANTS) :
-        api.debug("Groupe "+str(i))
         pathes = []
 
         # For each ants:
         for j in range (ACO_NB_ANTS) :
-            api.debug("    Fourmis "+str(j))
             pos = startPos
             path = [startPos]
             posesToVisit = list(metaGraph[pos].keys())
@@ -104,13 +103,10 @@ def antColonyOptimization (metaGraph, startPos) :
 
                 probas = [(posToVisit, mypow(formicMetaGraph[pos][posToVisit][1],ACO_FACTOR_PHERO)/mypow(formicMetaGraph[pos][posToVisit][0],ACO_FACTOR_DIST)) for posToVisit in posesToVisit]
                 posToGo = ut.weightedChoice(probas)
-                #api.debug ("        Probas : " +str(probas))
-                api.debug("        Decided to go to "+str(posToGo))
 
                 path.append (posToGo)
                 posesToVisit.remove (posToGo)
 
-            api.debug("Chemin ajouté : " + str(path))
             pathes.append (path)
             
 
@@ -125,8 +121,27 @@ def antColonyOptimization (metaGraph, startPos) :
 
 
 #
-#def chooseNextFormicCoin (fmg):
+def chooseFormicPath (fmg, startLoc, eatenCoins):
+
+    elLoc = startLoc
+    lenPath = len (fmg [elLoc])+1
+    bestPath = [elLoc]
     
+    # While we haven't got the full path
+    while len (bestPath) != lenPath:
+
+        # We get and sort the coins
+        nodesList = fmg[elLoc].items ()
+        nodesList = [(n[0],n[1][1]) for n in nodesList]
+        nodesList.sort (key = operator.itemgetter(1), reverse = True)
+
+        # We append the next coin
+        elLoc = nodesList[0][0]
+        bestPath.append (elLoc)
+
+    return bestPath
+
+        
 
 
 
@@ -134,52 +149,68 @@ def antColonyOptimization (metaGraph, startPos) :
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
     t0 = time.time()
     global METAGRAPH
-    global BESTPATHS
-    global FORMIC_META_GRAPH
+    global BESTPATHES
+    global FORMICMETAGRAPH
+
+    global GLOBALPATH
+    global ACTUALPATH
     
-    METAGRAPH, BESTPATHS = th.generateMetaGraph(mazeMap, playerLocation, coins)
+    METAGRAPH, BESTPATHES = th.generateMetaGraph(mazeMap, playerLocation, coins)
 
     t1 = time.time()
     api.debug(t1 - t0)
 
     
-    FORMIC_META_GRAPH = antColonyOptimization (METAGRAPH, playerLocation)
+    FORMICMETAGRAPH = antColonyOptimization (METAGRAPH, playerLocation)
 
     t2 = time.time()
     api.debug(t2 - t1)
     api.debug(t2 - t0)
 
-    api.debug(FORMIC_META_GRAPH)
+    GLOBALPATH = chooseFormicPath (FORMICMETAGRAPH, playerLocation, [])
+
+    api.debug (GLOBALPATH)
+    GLOBALPATH.pop(0)
 
 
 
 # This is where you should write your code to determine the next direction
 def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
 
-    global MOVING
+    # Travel heuristics variables
     global METAGRAPH
-    global FORMIC_META_GRAPH
-    global BESTPATHS
+    global FORMICMETAGRAPH
+    global BESTPATHES
+
+    # Pathes variables
+    global GLOBALPATH
+    global ACTUALPATH
+
+    # General variables
+    global MOVING    
     global EATENCOINS
-    global PATH
 
     
     EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
     EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, playerLocation)
 
     if MOVING :
-        if not PATH :
+        if not ACTUALPATH :
             MOVING = False
     
     if not MOVING :
-        nextCoin = chooseNextFormicCoin(FORMIC_META_GRAPH)
+        nextCoin = GLOBALPATH.pop (0)
+
+        api.debug(nextCoin)
         
-        PATH = BESTPATHS[playerLocation][nextCoin]
-        PATH.pop()
+        ACTUALPATH = list(BESTPATHES[playerLocation][nextCoin])
+        api.debug("Let's go from"+str(playerLocation) +" to "+str(nextCoin))
+        api.debug(ACTUALPATH)
+        ACTUALPATH.pop()
         
         MOVING = True
     
-    nextPos = PATH.pop()
+    nextPos = ACTUALPATH.pop()
 
     return ut.convertPosesToDir(nextPos, playerLocation, mazeMap)
 
