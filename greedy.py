@@ -64,7 +64,7 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     if not MOVING :
         CURRENTCOIN = chooseCoin(METAGRAPH, playerLocation, EATENCOINS)
 
-        PATH = BESTPATHS[playerLocation][CURRENTCOIN]
+        PATH = list(BESTPATHS[playerLocation][CURRENTCOIN])
         PATH.pop()
         
         MOVING = True

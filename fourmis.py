@@ -204,8 +204,6 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
         api.debug(nextCoin)
         
         ACTUALPATH = list(BESTPATHES[playerLocation][nextCoin])
-        api.debug("Let's go from"+str(playerLocation) +" to "+str(nextCoin))
-        api.debug(ACTUALPATH)
         ACTUALPATH.pop()
         
         MOVING = True
