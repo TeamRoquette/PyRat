@@ -7,12 +7,12 @@ import operator
 
 
 # CONSTANTS for ACO
-NB_ANTS = 6
-NB_GROUPS_ANTS = 6
+NB_ANTS = 25
+NB_GROUPS_ANTS = 25
 FACTOR_PHERO = 3
-FACTOR_DIST = 4
-FACTOR_EVAP = 0.3
-FACTOR_Q = 9
+FACTOR_DIST = 7
+FACTOR_EVAP = 0.8
+FACTOR_Q = 900
 
 
 
@@ -99,7 +99,7 @@ def generateFormicMetaGraph (metaGraph, startPos) :
             api.debug("\tFinally I went there : "+str(path))
             pathes.append (path)
 
-        debugFormicMetaGraph(formicMetaGraph, 5)
+#        debugFormicMetaGraph(formicMetaGraph, 9)
         # Finally we update the fmg with all pathes realized
         formicMetaGraph = evapPheroFormicMetaGraph (formicMetaGraph)
         for path in pathes:
@@ -120,11 +120,11 @@ def chooseFormicPath (fmg, startLoc, eatenCoins):
     # While we haven't got the full path
     while len (bestPath) != lenPath:
 
-        # We get and sort the coins
+        # We get the coins not already in bestPath and sort them
         nodesList = fmg[elLoc].items ()
-        nodesList = [(n[0],n[1][1]) for n in nodesList]
+        nodesList = [(n[0],n[1][1]) if n[0] not in bestPath else ([],-1)for n in nodesList]
         nodesList.sort (key = operator.itemgetter(1), reverse = True)
-
+        api.debug(nodesList)
         # We append the next coin
         elLoc = nodesList[0][0]
         bestPath.append (elLoc)
