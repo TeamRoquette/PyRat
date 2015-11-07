@@ -81,7 +81,6 @@ def generateFormicMetaGraph (metaGraph, startPos) :
 
         # For each ants:
         for j in range (NB_ANTS) :
-            api.debug("I am ant "+str(i)+str(j)+". Proud to serve U !")
             
             posToGo = startPos
             path = [startPos]
@@ -90,13 +89,15 @@ def generateFormicMetaGraph (metaGraph, startPos) :
             # We use the ant density of probability to determine every next step.
             while posesToVisit :
                 probas = [(posToVisit, mypow(formicMetaGraph[posToGo][posToVisit][1],FACTOR_PHERO)/mypow(formicMetaGraph[posToGo][posToVisit][0],FACTOR_DIST)) for posToVisit in posesToVisit]
+                su = sum([p[1] for p in probas])
+                probas = [(p[0],p[1]/su) for p in probas]
+
 
                 posToGo = ut.weightedChoice(probas)
 
                 path.append (posToGo)
                 posesToVisit.remove (posToGo)
 
-            api.debug("\tFinally I went there : "+str(path))
             pathes.append (path)
 
 #        debugFormicMetaGraph(formicMetaGraph, 9)
@@ -111,7 +112,7 @@ def generateFormicMetaGraph (metaGraph, startPos) :
 
 
 #
-def chooseFormicPath (fmg, startLoc, eatenCoins):
+def chooseFormicPath (fmg, startLoc, bestPathes, eatenCoins):
 
     elLoc = startLoc
     lenPath = len (fmg [elLoc])+1
@@ -124,10 +125,11 @@ def chooseFormicPath (fmg, startLoc, eatenCoins):
         nodesList = fmg[elLoc].items ()
         nodesList = [(n[0],n[1][1]) if n[0] not in bestPath else ([],-1)for n in nodesList]
         nodesList.sort (key = operator.itemgetter(1), reverse = True)
-        api.debug(nodesList)
-        # We append the next coin
+
+        # We get the next coin and append it
         elLoc = nodesList[0][0]
-        bestPath.append (elLoc)
+
+        bestPath.append(elLoc)
 
     return bestPath
 

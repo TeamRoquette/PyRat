@@ -127,3 +127,12 @@ def updateCoins (metaGraph, eatenCoins, elLocation):
         eatenCoins.append(elLocation)
     
     return eatenCoins
+
+
+
+def coinsInPath (path, mg, eatenCoins):
+    coins=[]
+    for c in path:
+        if c in mg.keys() and c not in eatenCoins:
+            coins.append(c)
+    return coins

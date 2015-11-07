@@ -44,7 +44,7 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
     api.debug(t2 - t1)
     api.debug(t2 - t0)
 
-    GLOBALPATH = aco.chooseFormicPath (FORMICMETAGRAPH, playerLocation, [])
+    GLOBALPATH = aco.chooseFormicPath (FORMICMETAGRAPH, playerLocation, BESTPATHES, [])
 
     api.debug (GLOBALPATH)
     GLOBALPATH.pop(0)
@@ -76,7 +76,11 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
             MOVING = False
     
     if not MOVING :
-        nextCoin = GLOBALPATH.pop (0)
+        # We choose a nextCoin who still is available:
+        while True:
+            nextCoin = GLOBALPATH.pop (0)
+            if not nextCoin in EATENCOINS:
+                break;
         
         ACTUALPATH = list(BESTPATHES[playerLocation][nextCoin])
         ACTUALPATH.pop()
