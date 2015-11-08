@@ -136,3 +136,24 @@ def coinsInPath (path, mg, eatenCoins):
         if c in mg.keys() and c not in eatenCoins:
             coins.append(c)
     return coins
+
+
+
+def metaGraphWithoutEaten (metaGraph, eatenCoins):
+    # deep copy of metaGraph without bad coins
+    mGwC = {a : {b : metaGraph[a][b] if not b in eatenCoins else 'd' for b in metaGraph[a].keys ()} if not a in eatenCoins else 'd' for a in metaGraph.keys ()}
+    for a in mGwC.keys ():
+        if mGwC[a] == 'd':
+            del (mGwC[a])
+        else:
+            for b in mGwC[a].keys ():
+                if mGwC[a][b]== 'd':
+                    del (mGwC[a][b])
+                    
+    return mGwC
+        
+    
+
+    
+def timeline (string, t0, tB, tE):
+    api.debug ("[" + str(tE-t0) + "]\t"+ string + "\t(" + str(tE-tB) + ")")

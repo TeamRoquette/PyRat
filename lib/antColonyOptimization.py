@@ -4,11 +4,11 @@
 import lib.PyratApi as api
 import lib.utils as ut
 import operator
-
+import time
 
 # CONSTANTS for ACO
 NB_ANTS = 25
-NB_GROUPS_ANTS = 25
+NB_ANTS_SAFETY_GAP = 1
 FACTOR_PHERO = 3
 FACTOR_DIST = 7
 FACTOR_EVAP = 0.8
@@ -66,21 +66,39 @@ def mypow(a,b):
 
 
 #
-def generateFormicMetaGraph (metaGraph, startPos) :
+def generateFormicMetaGraph (metaGraph, startPos, timeAllowed) :
     """
     This function is a metaheuristic to solve the travelling salesman problem by simulating a colony of ants.
     It returns the best way provided by these approximation.
     """
+    t0 = time.time ()
     
     formicMetaGraph = initFormicMetaGraph (metaGraph)
 
-
-    # For each groups of ants
-    for i in range (NB_GROUPS_ANTS) :
+    timeAnts = 0
+    nbAnts = 0
+    last = False
+    
+    # While we have the time !
+    while ((time.time()-t0) < timeAllowed) and not last :
         pathes = []
 
+        # Determine how many ants to send
+        if nbAnts == 0:
+            nbAntsToSend = NB_ANTS
+        else :
+            nbAntsToSend = int((timeAllowed+t0 - time.time())/(timeAnts/nbAnts) - NB_ANTS_SAFETY_GAP)
+
+            if nbAntsToSend < NB_ANTS :
+                last = True # Can't sand more (could guess we can send more because of safety_gap, but enforce not)
+            else:
+                nbAntsToSend = NB_ANTS # Ensure we send at max NB_ANTS
+        
         # For each ants:
-        for j in range (NB_ANTS) :
+        for j in range (nbAntsToSend) :
+
+            # Statistical stuff
+            tB = time.time ()
             
             posToGo = startPos
             path = [startPos]
@@ -100,13 +118,18 @@ def generateFormicMetaGraph (metaGraph, startPos) :
 
             pathes.append (path)
 
+            # Update stats
+            tE = time.time ()
+            timeAnts += tE-tB
+            nbAnts += 1
+
 #        debugFormicMetaGraph(formicMetaGraph, 9)
         # Finally we update the fmg with all pathes realized
         formicMetaGraph = evapPheroFormicMetaGraph (formicMetaGraph)
         for path in pathes:
             formicMetaGraph = addPheroFormicMetaGraph (formicMetaGraph, path)
 
-
+    api.debug ("\tSent "+str(nbAnts)+" for a total of "+str(timeAnts)+"s :" +str(nbAnts/timeAnts))
     return formicMetaGraph
 
 
