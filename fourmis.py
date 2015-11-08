@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import lib.PyratApi as api
+import lib.shortestPaths as sp
 import lib.travelHeuristics as th
 import lib.utils as ut
 import lib.antColonyOptimization as aco
@@ -72,8 +73,14 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, playerLocation)
 
     if MOVING :
+        # Plus de chemin ! On S'arrête
         if not ACTUALPATH :
             MOVING = False
+            
+        # Let's determine whether the opponent ate our coin.
+        elif ACTUALPATH[0] in EATENCOINS:
+            MOVING = False
+
     
     if not MOVING :
         # We choose a nextCoin who still is available:
@@ -81,8 +88,11 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
             nextCoin = GLOBALPATH.pop (0)
             if not nextCoin in EATENCOINS:
                 break;
-        
-        ACTUALPATH = list(BESTPATHES[playerLocation][nextCoin])
+
+        try:
+            ACTUALPATH = list(BESTPATHES[playerLocation][nextCoin])
+        except KeyError: # The path does'nt exist, let's calculate one:
+            ACTUALPATH = sp.shortestWay (mazeMap, playerLocation, nextCoin)
         ACTUALPATH.pop()
         
         MOVING = True
