@@ -28,8 +28,8 @@ PERCENTTIMEALLOWEDFORANTS = 0.80
 def chooseNextCoins (fmg, elLoc):
     # Just order by pheromone:
     nodesList = fmg[elLoc].items ()
-    nodesList.sort (key = operator.itemgetter(1), reverse = True)
-
+    
+    nodesList.sort (key = operator.itemgetter(1))
     return nodesList
 
 
@@ -90,14 +90,14 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     # Let's send some ant. Not too much
 
     t1 = time.time ()
-    FORMICMETAGRAPH = aco.generateFormicMetaGraph (newMetaGraph, GOALLOCATION, (timeAllowed-(t1-t0))*PERCENTTIMEALLOWEDFORANTS)
+    FORMICMETAGRAPH = aco.generateFormicMetaGraph (newMetaGraph, GOALLOCATION, (timeAllowed-(t1-t0))*PERCENTTIMEALLOWEDFORANTS, FORMICMETAGRAPH)
 
     if MOVING :
         # Plus de chemin ! On s'arrête
         if not ACTUALPATH :
             MOVING = False
             
-        # Let's determine whether the opponent ate our coin.
+        # Let's determine wether the opponent ate our coin.
         elif ACTUALPATH[0] in EATENCOINS:
             MOVING = False
 

@@ -9,21 +9,25 @@ import time
 # CONSTANTS for ACO
 NB_ANTS = 25
 NB_ANTS_SAFETY_GAP = 1
-FACTOR_PHERO = 3
-FACTOR_DIST = 7
-FACTOR_EVAP = 0.8
-FACTOR_Q = 900
+FACTOR_PHERO = 1
+FACTOR_DIST = 2
+FACTOR_EVAP = 0.3
+FACTOR_Q = 5*5
 
 
 
 #
-def initFormicMetaGraph (metaGraph) :
+def initFormicMetaGraph (metaGraph, formicMetaGraph=None) :
     """
     This function initalizes and retruns a formic meta graph which is a meta graph containing simultaneously the distance between
     two nodes and the amount of pheromones in the vertice.
     """
-    # We realise a deep copy of metaGraph and add a component to the 2nd dim
-    fmg = { (pos1) : { pos2 : [metaGraph[pos1][pos2], 0] for pos2 in metaGraph[pos1].keys() } for pos1 in metaGraph.keys() }
+    if formicMetaGraph:
+        fmg = { (pos1) : { pos2 : [metaGraph[pos1][pos2], formicMetaGraph[pos1][pos2][1]] for pos2 in metaGraph[pos1].keys() } for pos1 in metaGraph.keys() }
+#        api.debug(fmg)
+    else :
+        # We realise a deep copy of metaGraph and add a component to the 2nd dim
+        fmg = { (pos1) : { pos2 : [metaGraph[pos1][pos2], 0] for pos2 in metaGraph[pos1].keys() } for pos1 in metaGraph.keys() }
 
     return fmg
 
@@ -66,14 +70,14 @@ def mypow(a,b):
 
 
 #
-def generateFormicMetaGraph (metaGraph, startPos, timeAllowed) :
+def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=None) :
     """
     This function is a metaheuristic to solve the travelling salesman problem by simulating a colony of ants.
     It returns the best way provided by these approximation.
     """
     t0 = time.time ()
     
-    formicMetaGraph = initFormicMetaGraph (metaGraph)
+    formicMetaGraph = initFormicMetaGraph (metaGraph, formicMetaGraph)
 
     timeAnts = 0
     nbAnts = 0
@@ -109,7 +113,7 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed) :
                 probas = [(posToVisit, mypow(formicMetaGraph[posToGo][posToVisit][1],FACTOR_PHERO)/mypow(formicMetaGraph[posToGo][posToVisit][0],FACTOR_DIST)) for posToVisit in posesToVisit]
                 su = sum([p[1] for p in probas])
                 probas = [(p[0],p[1]/su) for p in probas]
-
+#                api.debug(probas)
 
                 posToGo = ut.weightedChoice(probas)
 
@@ -123,12 +127,12 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed) :
             timeAnts += tE-tB
             nbAnts += 1
 
-#        debugFormicMetaGraph(formicMetaGraph, 9)
         # Finally we update the fmg with all pathes realized
         formicMetaGraph = evapPheroFormicMetaGraph (formicMetaGraph)
         for path in pathes:
             formicMetaGraph = addPheroFormicMetaGraph (formicMetaGraph, path)
-
+#        debugFormicMetaGraph (formicMetaGraph, 5)
+            
     api.debug ("\tSent "+str(nbAnts)+" for a total of "+str(timeAnts)+"s :" +str(nbAnts/timeAnts))
     return formicMetaGraph
 
