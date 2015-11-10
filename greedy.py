@@ -50,8 +50,7 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     global PATH
     global CURRENTCOIN
     
-    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
-    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, playerLocation)
+    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, coins)
 
     if MOVING :
         if not PATH :

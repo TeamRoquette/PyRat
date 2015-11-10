@@ -114,17 +114,19 @@ def orderNodesByDistance(metaGraph, currentNode, eatenCoins):
 
 
 # Removes elLocation from metaGraph if elLoc is in it. 
-def updateCoins (metaGraph, eatenCoins, elLocation):
+def updateCoins (metaGraph, eatenCoins, actualCoins ):
     """
     updateCoins:
-    Inputs   : metaGraph (dict of dict of tuple), eatenCoins (list of tuple), eLlocation (tuple)
+    Inputs   : metaGraph (dict of dict of tuple), eatenCoins (list of tuple), actualCoins (list of tuple)
     Output   : list of tuple
 
-    The aim of this function is to update eatenCoins adding elLocation if necessary.
+    The aim of this function is to update eatenCoins adding new eaten coins by players.
     """
-
-    if elLocation in metaGraph:
-        eatenCoins.append(elLocation)
+    
+    if len(metaGraph) > len(actualCoins):
+        for coin in metaGraph :
+            if coin not in actualCoins :
+                eatenCoins.append(coin)
     
     return eatenCoins
 

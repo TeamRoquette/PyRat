@@ -84,7 +84,7 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     global EATENCOINS
 
     
-    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, opponentLocation)
+    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, coins)
 
     newMetaGraph = ut.metaGraphWithoutEaten (METAGRAPH, EATENCOINS)
     # Let's send some ant. Not too much
@@ -116,8 +116,6 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
         
         MOVING = True
 
-    # Now we can add actual location in eatenCoins
-    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, playerLocation)
 
     # Let's go !
     nextPos = ACTUALPATH.pop()
