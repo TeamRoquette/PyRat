@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import lib.shortestPaths as sp
+import lib.utils as ut
 
 
 def generateMetaGraph (mazeMap, playerLocation, coins):
@@ -82,7 +83,24 @@ def travellingSalesman(nodeStart, nodes):
     return bestDistance, bestPaths
 
 
-def backTrack(metaGraph, startNode, path, deep):
+def BT_auxi(startNode, nodes, distance, path, deep):
+
+    global bestDistance
+    global bestPaths
+
+    if deep == 0:
+        if distance < bestDistance :
+            bestDistance = distance
+            bestPath = path
+    else:
+        nextNode = ut.finNrearestCoin(nodes, startNode)
+        if distance + nextNode[1] < bestDistance :
+            toSeeNodes = list(nodes)
+            toSeeNodes.remove(node)
+            BT_auxi(nextNode, toSeeNodes, distance + node[1], path+[node[0]], deep -1)
+
+
+def backTrack(startNode, nodes, deep):
     """
     Implementation of the backTracking algorithm.  
     """
@@ -91,8 +109,10 @@ def backTrack(metaGraph, startNode, path, deep):
 
     bestDistance = float('inf')
     bestPaths = []
-                
-    BT_auxi(nodeStart, nodes, distance, path)
+    distance = 0;
+    path = []
+
+    BT_auxi(nodeStart, nodes, distance, path, deep)
     return bestDistance, bestPaths
 
 

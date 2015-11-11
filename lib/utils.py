@@ -159,3 +159,9 @@ def metaGraphWithoutEaten (metaGraph, eatenCoins):
     
 def timeline (string, t0, tB, tE):
     api.debug ("[" + str(tE-t0) + "]\t"+ string + "\t(" + str(tE-tB) + ")")
+
+def dist(metaGraph, begin, end):
+    try :
+        return metaGraph[begin][end]
+    except KeyError:
+        return -1;
