@@ -34,7 +34,6 @@ def chooseNextCoins (fmg, elLoc):
         raise AntError
 
     nodesList.sort (key = operator.itemgetter(1))
-    api.debug ('Here my pheromones :' + str(nodesList))
     return nodesList
 
 
@@ -62,11 +61,6 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
     
     ut.timeline ("Computed formic-meta-graph", t0, t1, t2)
 
-#    GLOBALPATH = aco.chooseFormicPath (FORMICMETAGRAPH, playerLocation, BESTPATHES, [])
-
-#    api.debug (GLOBALPATH)
-#    GLOBALPATH.pop(0)
-
 
 
 # This is where you should write your code to determine the next direction
@@ -92,42 +86,38 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     # We update eatenCoins except playerLocation
     EATENCOINS = ut.updateCoinsWoPlayerLoc (METAGRAPH, EATENCOINS, coins, playerLocation)
 
-    
+    if GOALLOCATION in EATENCOINS:
+        ACTUALPATH = th.findNearestCoin(mazeMap, playerLocation, coins)
+        GOALLOCATION = ACTUALPATH[0]
+        api.debug("Thief ! We go there : "+str(GOALLOCATION))
+        ACTUALPATH.pop ()
+
     newMetaGraph = ut.metaGraphWithoutEaten (METAGRAPH, EATENCOINS)
+
 
     # Let's send some ant. Not too much
     t1 = time.time ()
     FORMICMETAGRAPH = aco.generateFormicMetaGraph (newMetaGraph, GOALLOCATION, (timeAllowed-(t1-t0))*PERCENTTIMEALLOWEDFORANTS, FORMICMETAGRAPH)
 
     if MOVING :
-        # Plus de chemin ! On s'arrête
+        # Plus de chemin ou pièce bouffée, on s'arrete.
         if not ACTUALPATH :
             MOVING = False
-            
-        # Let's determine wether the opponent ate our coin.
-        elif ACTUALPATH[0] in EATENCOINS:
-            MOVING = False
-
+            EATENCOINS.append (playerLocation)
     
     if not MOVING :
-        # We choose a nextCoin who is still available:
+        # We choose the next coin with aco :
+        GOALLOCATION = chooseNextCoins(FORMICMETAGRAPH, playerLocation)[0][0]
+        
+        # Get next path
         try :
-            GOALLOCATION = chooseNextCoins(FORMICMETAGRAPH, playerLocation)[0][0]
+            ACTUALPATH = list (BESTPATHES[playerLocation][GOALLOCATION])
+        except KeyError: # The path doesn't exist, let's calculate one:
+            ACTUALPATH = sp.shortestWay (mazeMap, playerLocation, GOALLOCATION)
+         
 
-            # Get next path
-            try :
-                ACTUALPATH = list(BESTPATHES[playerLocation][GOALLOCATION])
-            except KeyError: # The path doesn't exist, let's calculate one:
-                ACTUALPATH = sp.shortestWay (mazeMap, playerLocation, GOALLOCATION)
-
-        except AntError : 
-            # Next coin can't be calculate, may be the opponent stole our coin ?
-            # We use greedy solution :
-            ACTUALPATH = th.findNearestCoin(mazeMap, playerLocation, coins)
-
-        ACTUALPATH.pop() # Get rid of the first position wich should be actualPosition
+        ACTUALPATH.pop () # Get rid of the first position wich should be actualPosition
         MOVING = True
-
 
     # Let's go !
     nextPos = ACTUALPATH.pop()

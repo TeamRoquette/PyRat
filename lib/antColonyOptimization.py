@@ -29,7 +29,7 @@ def initFormicMetaGraph (metaGraph, formicMetaGraph=None) :
     """
     if formicMetaGraph:
         fmg = { (pos1) : { pos2 : [metaGraph[pos1][pos2], formicMetaGraph[pos1][pos2][1]] for pos2 in metaGraph[pos1].keys() } for pos1 in metaGraph.keys() }
-#        api.debug(fmg)
+
     else :
         # We realise a deep copy of metaGraph and add a component to the 2nd dim
         fmg = { (pos1) : { pos2 : [metaGraph[pos1][pos2], 0] for pos2 in metaGraph[pos1].keys() } for pos1 in metaGraph.keys() }
@@ -116,10 +116,17 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=N
             # We use the ant density of probability to determine every next step.
             while posesToVisit :
                 probas = [(posToVisit, mypow(formicMetaGraph[posToGo][posToVisit][1],FACTOR_PHERO)/mypow(formicMetaGraph[posToGo][posToVisit][0],FACTOR_DIST)) for posToVisit in posesToVisit]
+
                 su = sum([p[1] for p in probas])
+
+                if su == 0:
+                    api.debug("That's weird !")
+                    api.debug("probas="+str(probas))
+                    api.debug([(posToVisit, formicMetaGraph[posToGo][posToVisit][1],formicMetaGraph[posToGo][posToVisit][0]) for posToVisit in posesToVisit])
+
                 probas = [(p[0],p[1]/su) for p in probas]
                 posToGo = ut.weightedChoice(probas)
-
+                
                 path.append (posToGo)
                 posesToVisit.remove (posToGo)
 
@@ -134,9 +141,7 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=N
         formicMetaGraph = evapPheroFormicMetaGraph (formicMetaGraph)
         for path in pathes:
             formicMetaGraph = addPheroFormicMetaGraph (formicMetaGraph, path)
-        #debugFormicMetaGraph (formicMetaGraph, 5)
             
-    api.debug ("\tSent "+str(nbAnts)+" for a total of "+str(timeAnts)+"s :" +str(nbAnts/timeAnts))
     return formicMetaGraph
 
 
