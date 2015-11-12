@@ -99,7 +99,7 @@ def backTrack(metaGraph, startNode, path, deep):
 
 def findNearestCoin(mazeMap, playerLocation, coinsList):
     """
-    Returns the best path for the nearest coins.
+    Returns the best path for the nearest coin.
     """
     
     routingTable = sp.dijkstra(mazeMap, playerLocation)

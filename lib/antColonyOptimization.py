@@ -16,6 +16,11 @@ FACTOR_Q = 5*5
 
 
 
+# Define the error used
+class AntError (ValueError):
+    '''
+    Raise this when a error happens with ACO.
+    '''
 #
 def initFormicMetaGraph (metaGraph, formicMetaGraph=None) :
     """
@@ -94,7 +99,7 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=N
             nbAntsToSend = int((timeAllowed+t0 - time.time())/(timeAnts/nbAnts) - NB_ANTS_SAFETY_GAP)
 
             if nbAntsToSend < NB_ANTS :
-                last = True # Can't sand more (could guess we can send more because of safety_gap, but enforce not)
+                last = True # Can't send more (could guess we can send more because of safety_gap, but enforce not)
             else:
                 nbAntsToSend = NB_ANTS # Ensure we send at max NB_ANTS
         
@@ -113,8 +118,6 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=N
                 probas = [(posToVisit, mypow(formicMetaGraph[posToGo][posToVisit][1],FACTOR_PHERO)/mypow(formicMetaGraph[posToGo][posToVisit][0],FACTOR_DIST)) for posToVisit in posesToVisit]
                 su = sum([p[1] for p in probas])
                 probas = [(p[0],p[1]/su) for p in probas]
-#                api.debug(probas)
-
                 posToGo = ut.weightedChoice(probas)
 
                 path.append (posToGo)
@@ -131,7 +134,7 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=N
         formicMetaGraph = evapPheroFormicMetaGraph (formicMetaGraph)
         for path in pathes:
             formicMetaGraph = addPheroFormicMetaGraph (formicMetaGraph, path)
-#        debugFormicMetaGraph (formicMetaGraph, 5)
+        #debugFormicMetaGraph (formicMetaGraph, 5)
             
     api.debug ("\tSent "+str(nbAnts)+" for a total of "+str(timeAnts)+"s :" +str(nbAnts/timeAnts))
     return formicMetaGraph

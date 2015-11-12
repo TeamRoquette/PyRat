@@ -26,10 +26,15 @@ PERCENTTIMEALLOWEDFORANTS = 0.80
 
 
 def chooseNextCoins (fmg, elLoc):
-    # Just order by pheromone:
-    nodesList = fmg[elLoc].items ()
-    
+    try : 
+        # Just order by pheromone:
+        nodesList = fmg[elLoc].items ()
+    except KeyError : 
+        # Told them there's an error :
+        raise AntError
+
     nodesList.sort (key = operator.itemgetter(1))
+    api.debug ('Here my pheromones :' + str(nodesList))
     return nodesList
 
 
@@ -84,11 +89,13 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     global EATENCOINS
 
     
-    EATENCOINS = ut.updateCoins(METAGRAPH, EATENCOINS, coins)
+    # We update eatenCoins except playerLocation
+    EATENCOINS = ut.updateCoinsWoPlayerLoc (METAGRAPH, EATENCOINS, coins, playerLocation)
 
+    
     newMetaGraph = ut.metaGraphWithoutEaten (METAGRAPH, EATENCOINS)
-    # Let's send some ant. Not too much
 
+    # Let's send some ant. Not too much
     t1 = time.time ()
     FORMICMETAGRAPH = aco.generateFormicMetaGraph (newMetaGraph, GOALLOCATION, (timeAllowed-(t1-t0))*PERCENTTIMEALLOWEDFORANTS, FORMICMETAGRAPH)
 
@@ -104,16 +111,21 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     
     if not MOVING :
         # We choose a nextCoin who is still available:
-        GOALLOCATION = chooseNextCoins(FORMICMETAGRAPH, playerLocation)[0][0]
-        api.debug(GOALLOCATION)
+        try :
+            GOALLOCATION = chooseNextCoins(FORMICMETAGRAPH, playerLocation)[0][0]
 
-        # Get next path
-        try:
-            ACTUALPATH = list(BESTPATHES[playerLocation][GOALLOCATION])
-        except KeyError: # The path does'nt exist, let's calculate one:
-            ACTUALPATH = sp.shortestWay (mazeMap, playerLocation, GOALLOCATION)
+            # Get next path
+            try :
+                ACTUALPATH = list(BESTPATHES[playerLocation][GOALLOCATION])
+            except KeyError: # The path doesn't exist, let's calculate one:
+                ACTUALPATH = sp.shortestWay (mazeMap, playerLocation, GOALLOCATION)
+
+        except AntError : 
+            # Next coin can't be calculate, may be the opponent stole our coin ?
+            # We use greedy solution :
+            ACTUALPATH = th.findNearestCoin(mazeMap, playerLocation, coins)
+
         ACTUALPATH.pop() # Get rid of the first position wich should be actualPosition
-        
         MOVING = True
 
 

@@ -114,7 +114,7 @@ def orderNodesByDistance(metaGraph, currentNode, eatenCoins):
 
 
 # Removes elLocation from metaGraph if elLoc is in it. 
-def updateCoins (metaGraph, eatenCoins, actualCoins ):
+def updateCoins (metaGraph, eatenCoins, actualCoins):
     """
     updateCoins:
     Inputs   : metaGraph (dict of dict of tuple), eatenCoins (list of tuple), actualCoins (list of tuple)
@@ -126,6 +126,25 @@ def updateCoins (metaGraph, eatenCoins, actualCoins ):
     if len(metaGraph) > len(actualCoins):
         for coin in metaGraph :
             if coin not in actualCoins :
+                eatenCoins.append(coin)
+    
+    return eatenCoins
+
+
+
+# Removes elLocation from metaGraph if elLoc is in it. 
+def updateCoinsWoPlayerLoc (metaGraph, eatenCoins, actualCoins, actualLoc):
+    """
+    updateCoinsWoPlayerLoc:
+    Inputs   : metaGraph (dict of dict of tuple), eatenCoins (list of tuple), actualCoins (list of tuple), actualLoc (tuple)
+    Output   : list of tuple
+
+    The aim of this function is to update eatenCoins adding new eaten coins by players without player location.
+    """
+    
+    if len(metaGraph) > len(actualCoins):
+        for coin in metaGraph :
+            if coin not in actualCoins and coin != actualLoc:
                 eatenCoins.append(coin)
     
     return eatenCoins
@@ -159,6 +178,8 @@ def metaGraphWithoutEaten (metaGraph, eatenCoins):
     
 def timeline (string, t0, tB, tE):
     api.debug ("[" + str(tE-t0) + "]\t"+ string + "\t(" + str(tE-tB) + ")")
+
+
 
 def dist(metaGraph, begin, end):
     try :
