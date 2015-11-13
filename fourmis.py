@@ -55,7 +55,7 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
     t1 = time.time()
     ut.timeline ("Computed meta-graph and best pathes", t0, t0, t1)
 
-    FORMICMETAGRAPH = aco.generateFormicMetaGraph (METAGRAPH, playerLocation, timeAllowed-(t1-t0))
+    FORMICMETAGRAPH = aco.generateFormicMetaGraph (METAGRAPH, playerLocation, (timeAllowed-(t1-t0))*0.99)
     
     t2 = time.time()
     
