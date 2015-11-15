@@ -43,3 +43,4 @@ def shortestWay (mazeMap, startLocation, stopLocation):
     Use dijkstra algorithm.
     """
     return orderPath (dijkstra (mazeMap, startLocation), startLocation, stopLocation, [])
+

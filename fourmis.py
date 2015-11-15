@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import lib.PyratApi as api
@@ -6,6 +6,7 @@ import lib.shortestPaths as sp
 import lib.travelHeuristics as th
 import lib.utils as ut
 import lib.antColonyOptimization as aco
+import lib.connard as connard
 
 import time
 import operator
@@ -21,14 +22,15 @@ FORMICMETAGRAPH = {}
 BESTPATHES = {}
 MOVING = False
 EATENCOINS = []
+PERCENTTIMEALLOWEDFORANTSBEGINNING = 0.95        
 PERCENTTIMEALLOWEDFORANTS = 0.80        
-
+ESTIMATEDTIMEMAIN = 0.01
 
 
 def chooseNextCoins (fmg, elLoc):
     try : 
         # Just order by pheromone:
-        nodesList = fmg[elLoc].items ()
+        nodesList = list (fmg[elLoc].items ())
     except KeyError : 
         # Told them there's an error :
         raise AntError
@@ -41,6 +43,12 @@ def chooseNextCoins (fmg, elLoc):
 # This function should not return anything, but should be used for a short preprocessing
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
     t0 = time.time()
+
+    # First we protect ourself from killing
+    connard.preventFromKilling ()
+
+    
+    # We add global variables
     global METAGRAPH
     global BESTPATHES
     global FORMICMETAGRAPH
@@ -48,19 +56,23 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
     global GLOBALPATH
     global ACTUALPATH
     global GOALLOCATION
-    
+
+
+    # Let's define global variables
     METAGRAPH, BESTPATHES = th.generateMetaGraph(mazeMap, playerLocation, coins)
     GOALLOCATION = playerLocation
     
     t1 = time.time()
-    ut.timeline ("Computed meta-graph and best pathes", t0, t0, t1)
+#    ut.timeline ("Computed meta-graph and best pathes", t0, t0, t1)
 
-    FORMICMETAGRAPH = aco.generateFormicMetaGraph (METAGRAPH, playerLocation, (timeAllowed-(t1-t0))*0.99)
+    # Now let's send a looooot of ants
+    FORMICMETAGRAPH = aco.generateFormicMetaGraph (METAGRAPH, playerLocation, (timeAllowed-(t1-t0))*PERCENTTIMEALLOWEDFORANTSBEGINNING)
+
     
     t2 = time.time()
-    
-    ut.timeline ("Computed formic-meta-graph", t0, t1, t2)
+#    ut.timeline ("Computed formic-meta-graph", t0, t1, t2)
 
+    # Ready !
 
 
 # This is where you should write your code to determine the next direction
@@ -97,7 +109,7 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
 
     # Let's send some ant. Not too much
     t1 = time.time ()
-    FORMICMETAGRAPH = aco.generateFormicMetaGraph (newMetaGraph, GOALLOCATION, (timeAllowed-(t1-t0))*PERCENTTIMEALLOWEDFORANTS, FORMICMETAGRAPH)
+    FORMICMETAGRAPH = aco.generateFormicMetaGraph (newMetaGraph, GOALLOCATION, (timeAllowed-(t1-t0)-ESTIMATEDTIMEMAIN)*PERCENTTIMEALLOWEDFORANTS, FORMICMETAGRAPH)
 
     if MOVING :
         # Plus de chemin ou pièce bouffée, on s'arrete.

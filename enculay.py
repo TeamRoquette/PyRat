@@ -8,7 +8,7 @@ BOT_NAME = "Template"
 
 
 def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocation, opponentLocation, coins) :
-    co.displayMotd ()
+#    co.displayMotd ()
     co.stopOpponent ()
 
 

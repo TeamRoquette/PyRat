@@ -15,15 +15,17 @@ import lib.PyratApi as api
 
 
 
-def handlerDoNothing (signum, frame):
+def handler (signum, frame):
     api.debug ("Sir, someone's trying to kill me !")
 
 
 
 def preventFromKilling():
-    signal.signal(signal.SIGSTP, handlerDoNothing)
-    signal.signal(signal.SIGILL, handlerDoNothing)
-
+    api.debug ("Protecting myself....")
+    signal.signal(signal.SIGILL, handler)
+    signal.signal(signal.SIGTSTP, handler)
+    signal.signal(signal.SIGCONT, handler)
+    api.debug ("Protected !")
 
 
 def getPids(name):
@@ -37,7 +39,7 @@ def stopOpponent():
     pids = getPids("python3")
     api.debug(pids)
     for pid in pids:
-        os.kill(pid, signal.SIGSTOP)
+        os.kill(pid, signal.SIGTSTP)
 
 
 
