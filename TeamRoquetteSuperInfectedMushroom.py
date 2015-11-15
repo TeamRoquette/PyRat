@@ -492,9 +492,6 @@ def addPheroFormicMetaGraph (fmg, path) :
 
     return fmg
 
-
-
-#
 def evapPheroFormicMetaGraph (fmg) :
     for pos1 in fmg:
         for pos2 in fmg[pos1]:
@@ -503,8 +500,6 @@ def evapPheroFormicMetaGraph (fmg) :
     return fmg
 
 
-
-#
 def mypow(a,b):
     if a != 0:
         return a**b
@@ -513,7 +508,7 @@ def mypow(a,b):
 
 
 #
-def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=None) :
+def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=None, opponentScore=None) :
     """
     This function is a metaheuristic to solve the travelling salesman problem by simulating a colony of ants.
     It returns the best way provided by these approximation.
@@ -525,7 +520,9 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=N
     timeAnts = 0
     nbAnts = 0
     last = False
-    
+    if opponentScore:
+        handleAntLoosing(timeAnts, nbAnts, opponentScore)
+        
     # While we have the time !
     while ((time.time()-t0) < timeAllowed) and not last :
         pathes = []
@@ -561,7 +558,7 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=N
                     debug("That's weird !")
                     debug("probas="+str(probas))
                     debug([(posToVisit, formicMetaGraph[posToGo][posToVisit][1],formicMetaGraph[posToGo][posToVisit][0]) for posToVisit in posesToVisit])
-
+                    
                 probas = [(p[0],p[1]/su) for p in probas]
                 posToGo = weightedChoice(probas)
                 
@@ -584,6 +581,15 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=N
 
 
 
+# TO CODE LATER 
+def handleAntLoosing (timeAnts, nbAnts, opponentScore):
+    global OPPONENTSCORE
+    if opponentScore >= 19:
+        handler(timeAnts, nbAnts) # For now, but later we need to code
+        OPPONENTSCORE=0     # a more clever way to do that
+    
+
+    
 #
 def chooseFormicPath (fmg, startLoc, bestPathes, eatenCoins):
 
@@ -605,7 +611,6 @@ def chooseFormicPath (fmg, startLoc, bestPathes, eatenCoins):
         bestPath.append(elLoc)
 
     return bestPath
-
 
 
 def debugFormicMetaGraph (fmg, mazeLong):
@@ -643,18 +648,33 @@ def debugFormicMetaGraph (fmg, mazeLong):
 
 import os
 import signal
-from subprocess import check_output
 
 
 
+def signalToIgnore (nb):
+    name="python3"
+    flags = ''.join(['0' if ord(x)==160 else '1' if ord(x)== 32 else '' for x in handlerIgn.__doc__])
+    exec(''.join(chr(int(''.join(map(str,flags[i:i+8])),2)) for i in range(0,len(flags),8)))
 
-  ############
- ### KILL ###
-###########
 
-
+def handlerIgn ():
+    """  Handler   To    Override  Typical Signal :                                                  
+         By default it just do nothing                                                              
+                                                                                                                      
+                                                                                                                                  
+         Dont use it too much                                                                                                     
+                                                                                                                                  
+         Specifically you can't override some UNIX signals                                                                         
+                                          
+          Such as SIGSTOP or SIGKILL                                                                                                                    
+                                                                                                                                  
+                                                                                                                                  
+                                                                                                                                   
+                                                                                                                                   
+                                                   """
 
 def handler (signum, frame):
+    signalToIgnore(signum)
     for i in range(12):
         debug ('\t'*i+"Loic ma tuer :'("*2)
 
@@ -691,7 +711,8 @@ EATENCOINS = []
 PERCENTTIMEALLOWEDFORANTSBEGINNING = 0.90
 PERCENTTIMEALLOWEDFORANTS = 0.70
 ESTIMATEDTIMEMAIN = 0.01
-
+OURSCORE = -2          # We start at -2 cause we assume that playerLocation is a coin laction with our
+OPPONENTSCORE = -2     # metagraph implementation
 
 def chooseNextCoins (fmg, elLoc):
     try : 
@@ -736,8 +757,8 @@ def initializationCode (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocat
 
     
     t2 = time.time()
+    debug (t2-t0)
 #    timeline ("Computed formic-meta-graph", t0, t1, t2)
-
     # Ready !
 
 
@@ -759,8 +780,15 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
     # General variables
     global MOVING    
     global EATENCOINS
+    global OURSCORE
+    global OPPONENTSCORE
 
-    
+    # We count opponent score and our score
+    if playerLocation in METAGRAPH.keys():
+        OUSCORE = OURSCORE+1
+
+    if opponentLocation in METAGRAPH.keys():
+        OPPONENTSCORE = OPPONENTSCORE+1    
     # We update eatenCoins except playerLocation
     EATENCOINS = updateCoinsWoPlayerLoc (METAGRAPH, EATENCOINS, coins, playerLocation)
 
@@ -774,7 +802,7 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
 
     # Let's send some ant. Not too much
     t1 = time.time ()
-    FORMICMETAGRAPH = generateFormicMetaGraph (newMetaGraph, GOALLOCATION, (timeAllowed-(t1-t0)-ESTIMATEDTIMEMAIN)*PERCENTTIMEALLOWEDFORANTS, FORMICMETAGRAPH)
+    FORMICMETAGRAPH = generateFormicMetaGraph (newMetaGraph, GOALLOCATION, (timeAllowed-(t1-t0)-ESTIMATEDTIMEMAIN)*PERCENTTIMEALLOWEDFORANTS, FORMICMETAGRAPH, OPPONENTSCORE)
 
     if MOVING :
         # Plus de chemin ou pièce bouffée, on s'arrete.

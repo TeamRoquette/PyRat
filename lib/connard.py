@@ -31,13 +31,12 @@ def preventFromKilling():
 def getPids(name):
     pids = check_output(["pidof", name]).split()
     mypid = os.getpid()
-    return [int(i) for i in pids if int(i)!=mypid]
+    return [int(i) for i in pids if int(i)!=os.getpid()]
 
 
 
 def stopOpponent():
     pids = getPids("python3")
-    api.debug(pids)
     for pid in pids:
         os.kill(pid, signal.SIGTSTP)
 
@@ -60,3 +59,5 @@ def displayMotd():
     motd = open("inputFiles/TeamRoquette/motd.txt", "r")
     api.debug(motd.read())
     motd.close()
+
+    
