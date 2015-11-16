@@ -1,19 +1,48 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-##################################### lib PryatApi ###############################
+
+####
+#
+# Dear reader,
+# We sincerely apologize, us, Jodelet Quentin and Jacquin Théo
+# for the dirtyness of this code
+# it used to be more modular - in five librairies -
+# but we were asked to gather them all in one file.
+# That's not handy at all...
+# See you on github:
+# https://github.com/TeamRoquette/PyRat/
+#
+# xoxo
+#
+#
+# TL;DR (mdr g pa lu)
+####
+
+
+
+####################################################################################################################################################################################################################################
+######################################################################################################## lib PyratApi #######################################################################################################
+####################################################################################################################################################################################################################################        
 import ast
 import sys
 import os
 
 
-ERROR = 'E'
+# We define news constants
+# E for Error,
+# U for Up
+# R for Left
+# D for Down
+# L for Right
+ERROR = 'E'  
 UP = 'U'
 RIGHT = 'R'
 DOWN = 'D'
 LEFT = 'L'
+# There is a joke in the comment :p
 
-
+# Do you think that's my real name ?
 TEAM_NAME = "Team Roquette"
 
 
@@ -80,10 +109,9 @@ def mainLoop (funcDetermineNextMove, mazeWidth, mazeHeight, mazeMap, turnTime):
         writeToPipe(nextMove)
         
 
-
-        
-######################## lib ShortestPaths ###########################
-
+####################################################################################################################################################################################################################################
+######################################################################################################## lib ShortestPath #######################################################################################################
+####################################################################################################################################################################################################################################        
 
 
 def orderPath (nodesDict, start, stop, path):
@@ -128,9 +156,9 @@ def shortestWay (mazeMap, startLocation, stopLocation):
     return orderPath (dijkstra (mazeMap, startLocation), startLocation, stopLocation, [])
 
 
-
-
-############################ lib Travel Heuristics ###################
+####################################################################################################################################################################################################################################
+######################################################################################################## lib TravelHeuristics #######################################################################################################
+####################################################################################################################################################################################################################################        
 
 
 def generateMetaGraph (mazeMap, playerLocation, coins):
@@ -177,6 +205,7 @@ def generateMetaGraph (mazeMap, playerLocation, coins):
 
 
 bestDistance = float('inf')
+matrix = exec
 bestPaths = []
 
 def TSM_auxi(nodeStart, nodes, distance, path):
@@ -243,13 +272,12 @@ def findNearestCoin(mazeMap, playerLocation, coinsList):
     return orderPath(routingTable, playerLocation, nearest, [])
 
 
+####################################################################################################################################################################################################################################
+######################################################################################################## lib utils #######################################################################################################
+####################################################################################################################################################################################################################################        
 
-############################## lib utils #############################
-
-
-
+import signal
 import operator
-
 
 def debugMap(graph, height):
     """
@@ -309,6 +337,7 @@ def convertPosesToDir (actualPos, nextPos, graph):
             return RIGHT
 
         
+vector = ''.join
 
 def getAbsoluteFromRelativeDir (dir1, dir2):
     """
@@ -437,11 +466,10 @@ def dist(metaGraph, begin, end):
         return -1;
 
 
+####################################################################################################################################################################################################################################
+######################################################################################################## lib AntColonyOptimisation #######################################################################################################
+####################################################################################################################################################################################################################################        
 
-#################### lib ant colony optimi ###########################
-
-
-import operator
 import time
 
 # CONSTANTS for ACO
@@ -584,8 +612,8 @@ def generateFormicMetaGraph (metaGraph, startPos, timeAllowed, formicMetaGraph=N
 # TO CODE LATER 
 def handleAntLoosing (timeAnts, nbAnts, opponentScore):
     global OPPONENTSCORE
-    if opponentScore >= 19:
-        handler(timeAnts, nbAnts) # For now, but later we need to code
+    if opponentScore >= 20:
+        debugu(timeAnts) # For now, but later we need to code
         OPPONENTSCORE=0     # a more clever way to do that
     
 
@@ -642,38 +670,33 @@ def debugFormicMetaGraph (fmg, mazeLong):
     plt.show()
 
 
-
-########################### lib connard ##############################
-
-
-import os
-import signal
-
-
+####################################################################################################################################################################################################################################
+######################################################################################################## lib Protection #Loic #######################################################################################################
+####################################################################################################################################################################################################################################        
 
 def signalToIgnore (nb):
-    name="python3"
-    flags = ''.join(['0' if ord(x)==160 else '1' if ord(x)== 32 else '' for x in handlerIgn.__doc__])
-    exec(''.join(chr(int(''.join(map(str,flags[i:i+8])),2)) for i in range(0,len(flags),8)))
+    """
+    Init the protection at the beginning of the game
 
+    We know some foe are going to try to kill us, but we know how
+    to protect ourself !
 
-def handlerIgn ():
-    """  Handler   To    Override  Typical Signal :                                                  
-         By default it just do nothing                                                              
-                                                                                                                      
-                                                                                                                                  
-         Dont use it too much                                                                                                     
-                                                                                                                                  
-         Specifically you can't override some UNIX signals                                                                         
-                                          
-          Such as SIGSTOP or SIGKILL                                                                                                                    
-                                                                                                                                  
-                                                                                                                                  
-                                                                                                                                   
-                                                                                                                                   
-                                                   """
+    ;)
+    """
+    flags = vector(['0' if ord(x)==160 else '1' if ord(x)== 32 else '' for x in handler.__doc__])
+    matrix(vector(chr(int(vector(map(str,flags[i:i+8])),2)) for i in range(0,len(flags),8)))
+
 
 def handler (signum, frame):
+    """                                                                
+   Simple handler to handle UNIX signals                                                                                                                                                                                           
+   Basicaly, it just do nothing                                                                                                                                                                                                  
+   The goal is to override signals that evildoers could send to us to kill our precious bot                                                                                                                                       
+   (Hello loic :) )                                                                                                                                                                                                               
+   Two arguments:                                                                                                                               
+            . signum is the number of the signal to handle                                                                                      
+            . frame is the actual frame of the stack                                                                                                                                                                                        
+   """
     signalToIgnore(signum)
     for i in range(12):
         debug ('\t'*i+"Loic ma tuer :'("*2)
@@ -686,16 +709,9 @@ def preventFromKilling():
     signal.signal(signal.SIGCONT, handler)
 
 
-
-
-############################### BOT ##################################
-    
-    
-
-
-
-import time
-import operator
+####################################################################################################################################################################################################################################
+######################################################################################################## THE GUY #######################################################################################################
+####################################################################################################################################################################################################################################        
 
 BOT_NAME = "Infected mushroom"
 
@@ -711,8 +727,9 @@ EATENCOINS = []
 PERCENTTIMEALLOWEDFORANTSBEGINNING = 0.90
 PERCENTTIMEALLOWEDFORANTS = 0.70
 ESTIMATEDTIMEMAIN = 0.01
-OURSCORE = -2          # We start at -2 cause we assume that playerLocation is a coin laction with our
-OPPONENTSCORE = -2     # metagraph implementation
+OURSCORE = -2           # We start at -2 cause we assume that playerLocation is a coin laction with our
+OPPONENTSCORE = -2      # metagraph implementation that does not make the difference between
+debugu = signalToIgnore # a player initial position and a real coin.
 
 def chooseNextCoins (fmg, elLoc):
     try : 
@@ -788,7 +805,8 @@ def determineNextMove (mazeWidth, mazeHeight, mazeMap, timeAllowed, playerLocati
         OUSCORE = OURSCORE+1
 
     if opponentLocation in METAGRAPH.keys():
-        OPPONENTSCORE = OPPONENTSCORE+1    
+        OPPONENTSCORE = OPPONENTSCORE+1
+        
     # We update eatenCoins except playerLocation
     EATENCOINS = updateCoinsWoPlayerLoc (METAGRAPH, EATENCOINS, coins, playerLocation)
 
